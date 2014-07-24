@@ -43,6 +43,7 @@ func realMain() int {
 			return 1
 		}
 	}
-	nsenterexec(pid)
+	// pid int, uid int, git int, wd string, shell string
+	nsenterexec(pid, 0, 0, "/", "/bin/ash")
 	return 0
 }
