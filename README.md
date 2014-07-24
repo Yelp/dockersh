@@ -6,8 +6,11 @@ A shell which places uses into individual docker containers
 Configuration
 =============
 
-~/.dockershrc.json
-------------------
+We use the [XDG](http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+specification for configuration file locations. The default config file locations are shown below
+
+~/.config/dockersh.json
+-----------------------
 
 Local (per user) settings for a specific user's dockersh instance.
 
@@ -19,11 +22,11 @@ mount_home_to | False or string. Where to map the user's home directory inside t
 container_username | String Username which should be used inside the container. Defaults to %u (which is interpolated) | root
 
 
-/etc/dockershrc.json
---------------------
+/etc/xdg/dockershrc.json
+------------------------
 
 Global settings for all dockersh instances. Allows you to disable settings
-in ~/.dockershrc
+in the per-user dockersh.json 
 
 
 Copyright
