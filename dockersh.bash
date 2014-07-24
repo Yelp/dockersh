@@ -5,7 +5,7 @@ REAL_SHELL=/bin/ash
 
 # Must use a conistent naming scheme, docker will only let one of these run
 # at a time.
-DOCKER_NAME="$USER_shell"
+DOCKER_NAME="${USER}_shell"
 
 # TODO: Figure out what they want from config
 DOCKER_CONTAINER=busybox
