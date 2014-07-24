@@ -21,11 +21,11 @@ func realMain() int {
 		return 1
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
-	pid, err := dockerpid("juliank_shell")
+	pid, err, out := dockerpid("juliank_shell")
 	if err != nil {
-		pid, err = dockerstart("juliank_shell", "busybox")
+		pid, err, out = dockerstart("juliank_shell", "busybox")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cound not start container: %s\n", err)
+			fmt.Fprintf(os.Stderr, "cound not start container: %s: %s\n", err, out)
 			return 1
 		}
 	}
