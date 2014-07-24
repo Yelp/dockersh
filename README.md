@@ -21,6 +21,7 @@ mount_home  | Boolean. | If the user's home directory (as specified in /etc/pass
 mount_home_to | False or string. | Where to map the user's home directory inside the container | /opt/home/myhomedir
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | root
 shell | String | The shell that should be started for the user inside the container | /bin/bash
+blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | ['container_username', 'mount_home', 'mount_home_to']
 
 /etc/xdg/dockershrc.json
 ------------------------
