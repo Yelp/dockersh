@@ -19,3 +19,8 @@ in ~/.dockershrc
 Local (per user) settings for a specific user's dockersh instance.
 
 
+Copyright
+=========
+
+Copyright (c) 2014 Yelp. Some rights are reserved (see the LICENSE file for more details).
+
