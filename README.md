@@ -12,6 +12,10 @@ You need to install golang (tested on >= 1.3), then you should just be able to r
 
 and a 'dockersh' binary will be generated in your $GOPATH (or .)
 
+NOTE: dockersh requires a patched version of the 'nsenter' utility currently. It is recommended that
+you remove any version of nsenter you have installed currently, then invoke dockersh, which will
+tell you how to install the patched version.
+
 Configuration
 =============
 
