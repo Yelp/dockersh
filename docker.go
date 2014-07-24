@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -26,9 +27,13 @@ func dockerpid(name string) (pid int, err error, out string) {
 	return pid, nil, string(output)
 }
 
-func dockerstart(name string, container string) (pid int, err error, out string) {
-	exec.Command("docker", "rm", "--name", name)
-	cmd := exec.Command("docker", "run", "-t", "-i", "--name", name, "-d", container)
+func dockerstart(username string, homedir string, name string, container string) (pid int, err error, out string) {
+	cmd := exec.Command("docker", "rm", "--name", name)
+	err = cmd.Run()
+
+	// docker run -t -i -u $DESIRED_USER --hostname="$MYHOSTNAME" --name="$DOCKER_NAME" -v $HOMEDIR:$HOMEDIR:rw -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -d "$DOCKER_CONTAINER"
+	cmd = exec.Command("docker", "run", "-t", "-i", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir), "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro", "--name", name, "-d", container)
+
 	var output bytes.Buffer
 	cmd.Stdout = &output
 	cmd.Stderr = &output

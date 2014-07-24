@@ -37,7 +37,7 @@ func realMain() int {
 
 	pid, err, out := dockerpid(container_name)
 	if err != nil {
-		pid, err, out = dockerstart(container_name, "busybox")
+		pid, err, out = dockerstart(u.Username, u.HomeDir, container_name, "busybox")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "cound not start container: %s: %s\n", err, out)
 			return 1
