@@ -17,7 +17,7 @@ func realMain() int {
 	}
 	if !found {
 		fmt.Fprintf(os.Stderr, "nsenter is not installed\n");
-		fmt.Fprintf(os.Stderr, "run boot2docker ssh 'docker run --rm -v /var/lib/boot2docker/:/target jpetazzo/nsenter'\n");
+		fmt.Fprintf(os.Stderr, "run boot2docker ssh 'docker run --rm -v /var/lib/boot2docker/:/target bobtfish/nsenter'\n");
 		return 1
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
