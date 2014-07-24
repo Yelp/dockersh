@@ -3,29 +3,32 @@
 # TODO: Figure out they want for a real shell
 REAL_SHELL=/bin/ash
 
+DESIRED_USER="nobody"
 # Must use a conistent naming scheme, docker will only let one of these run
 # at a time.
-DOCKER_NAME="${USER}_shell"
+DOCKER_NAME="${DESIRED_USER}_shell"
 
 # TODO: Figure out what they want from config
 DOCKER_CONTAINER=busybox
 
-DESIRED_USER="nobody"
-DESIRED_GROUP="nobody"
-# FIXME - We should instead work out the target UID inside the destination container?
-MYUID=$(id -u $DESIRED_USER)
-MYGID=$(id -g $DESIRED_GROUP)
+DESIRED_USER="vagrant"
 
-PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME")
+# FIXME - We should instead work out the target UID inside the destination container?
+DESIRED_UID=$(id -u $DESIRED_USER)
+DESIRED_GID=$(id -g $DESIRED_USER)
+HOMEDIR=$(eval echo ~$DESIRED_USER)
+MYHOSTNAME=$(hostname --fqdn)
+
+PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME" 2>/dev/null)
 # If we got here, then the docker is not running.
 if [ -z "$PID" ] || [ "$PID" == 0 ]; then
     # If the docker is stopped, we must remove it and start a new one
-    docker rm --name="$DOCKER_NAME"
+    docker rm --name="$DOCKER_NAME" >/dev/null 2>&1 # May not be running, just throw away the output
     # TODO: Configur the bind mounts
     # FIXME - If you docker attach to this container, then Ctrl-D, it dies. (This is expected?)
-    docker run -t -i -u $DESIRED_USER --name="$DOCKER_NAME" -v "$HOME":/root/:rw -d "$DOCKER_CONTAINER"
+    docker run -t -i -u $DESIRED_USER --net=host --name="$DOCKER_NAME" -v $HOMEDIR:$HOMEDIR:rw -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -d "$DOCKER_CONTAINER"
     PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME")
 fi
 
-sudo nsenter --target "$PID" --mount --uts --ipc --net --pid --setuid $MYUID --setgid $MYGID -- "$REAL_SHELL"
+sudo nsenter --target "$PID" --mount --uts --ipc --net --pid --setuid $DESIRED_UID --setgid $DESIRED_GID --wd=$HOMEDIR -- "$REAL_SHELL"
 
