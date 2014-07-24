@@ -17,7 +17,7 @@ DESIRED_USER="vagrant"
 DESIRED_UID=$(id -u $DESIRED_USER)
 DESIRED_GID=$(id -g $DESIRED_USER)
 HOMEDIR=$(eval echo ~$DESIRED_USER)
-MYHOSTNAME=$(hostname --fqdn)
+MYHOSTNAME="$(hostname --fqdn)-${DESIRED_USER}-docker"
 
 PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME" 2>/dev/null)
 # If we got here, then the docker is not running.
@@ -26,7 +26,7 @@ if [ -z "$PID" ] || [ "$PID" == 0 ]; then
     docker rm --name="$DOCKER_NAME" >/dev/null 2>&1 # May not be running, just throw away the output
     # TODO: Configur the bind mounts
     # FIXME - If you docker attach to this container, then Ctrl-D, it dies. (This is expected?)
-    docker run -t -i -u $DESIRED_USER --net=host --name="$DOCKER_NAME" -v $HOMEDIR:$HOMEDIR:rw -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -d "$DOCKER_CONTAINER"
+    docker run -t -i -u $DESIRED_USER --hostname="$MYHOSTNAME" --name="$DOCKER_NAME" -v $HOMEDIR:$HOMEDIR:rw -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -d "$DOCKER_CONTAINER"
     PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME")
 fi
 
