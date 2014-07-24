@@ -3,6 +3,15 @@ dockersh
 
 A shell which places uses into individual docker containers
 
+Compiling dockersh
+==================
+
+You need to install golang (tested on >= 1.3), then you should just be able to run:
+
+    go install
+
+and a 'dockersh' binary will be generated in your $GOPATH (or .)
+
 Configuration
 =============
 
