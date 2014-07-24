@@ -27,6 +27,7 @@ func dockerpid(name string) (pid int, err error, out string) {
 }
 
 func dockerstart(name string, container string) (pid int, err error, out string) {
+	exec.Command("docker", "rm", "--name", name)
 	cmd := exec.Command("docker", "run", "-t", "-i", "--name", name, "-d", container)
 	var output bytes.Buffer
 	cmd.Stdout = &output
