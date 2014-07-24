@@ -36,6 +36,17 @@ Problems to solve
  * Getting multiple shells into the same container (use of nsenter)
  * What becomes PID 1 inside the container? (sh while loop, but zombies?)
 
+Contributing
+============
+
+Patches are very very welcome!
+
+Please make a branch and send us a pull request.
+
+Please ensure that you use the supplied pre-commit hook to correctly format your code:
+
+    ln -s hooks/pre-commit .git/hooks/pre-commit
+
 Copyright
 =========
 

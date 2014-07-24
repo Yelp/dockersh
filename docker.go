@@ -1,14 +1,14 @@
 package main
 
 import (
+	"errors"
 	"os/exec"
 	"strconv"
 	"strings"
-	"errors"
 )
 
 func dockerpid(name string) (pid int, err error) {
-	cmd := exec.Command("docker",  "inspect",  "--format", "{{.State.Pid}}", name)
+	cmd := exec.Command("docker", "inspect", "--format", "{{.State.Pid}}", name)
 	output, err := cmd.Output()
 	if err != nil {
 		return -1, err
@@ -25,9 +25,8 @@ func dockerpid(name string) (pid int, err error) {
 	return pid, nil
 }
 
-
 func dockerstart(name string, container string) (pid int, err error) {
-	cmd := exec.Command("docker",  "run",  "-t", "-i", "--name", name, "-d", container)
+	cmd := exec.Command("docker", "run", "-t", "-i", "--name", name, "-d", container)
 	err = cmd.Run()
 	if err != nil {
 		return -1, err
