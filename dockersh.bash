@@ -20,4 +20,5 @@ if [ -z "$PID" ] || [ "$PID" == 0 ]; then
     PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME")
 fi
 
-sudo nsenter --target $PID --mount --uts --ipc --net --pid -- $REAL_SHELL
+sudo nsenter --target "$PID" --mount --uts --ipc --net --pid -- "$REAL_SHELL"
+
