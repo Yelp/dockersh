@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/user"
 )
 
 func main() {
@@ -21,9 +22,22 @@ func realMain() int {
 		return 1
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
-	pid, err, out := dockerpid("juliank_shell")
+	u, err2 := user.Current()
+	if err2 != nil {
+		fmt.Fprintf(os.Stderr, "Current: %v", err2)
+	}
+	if u.HomeDir == "" {
+		fmt.Fprintf(os.Stderr, "didn't get a HomeDir")
+	}
+	if u.Username == "" {
+		fmt.Fprintf(os.Stderr, "didn't get a username")
+	}
+
+	var container_name = fmt.Sprintf("%s_dockersh", u.Username)
+
+	pid, err, out := dockerpid(container_name)
 	if err != nil {
-		pid, err, out = dockerstart("juliank_shell", "busybox")
+		pid, err, out = dockerstart(container_name, "busybox")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "cound not start container: %s: %s\n", err, out)
 			return 1
