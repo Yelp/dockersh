@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"strconv"
 )
 
 func main() {
@@ -44,6 +45,10 @@ func realMain() int {
 		}
 	}
 	// pid int, uid int, git int, wd string, shell string
-	nsenterexec(pid, 0, 0, "/", "/bin/ash")
+	var uid int
+	uid, err = strconv.Atoi(u.Uid)
+	var gid int
+	gid, err = strconv.Atoi(u.Gid)
+	nsenterexec(pid, uid, gid, u.HomeDir, "/bin/ash")
 	return 0
 }
