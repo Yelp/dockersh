@@ -1,11 +1,76 @@
 package main
 
 import (
+	"errors"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"strconv"
 )
+
+type configuration struct {
+	ImageName           string   `json:"image_name"`
+	MountHomeTo         string   `json:"mount_home_to"`
+	ContainerUsername   string   `json:"container_username"`
+	Shell               string   `json:"shell"`
+	BlacklistUserConfig []string `json:"blacklist_user_config"`
+}
+
+func loadConfig() (config *configuration, err error) {
+	config = &configuration{
+		ImageName: "busybox",
+		MountHomeTo: "{{Home}}",
+		ContainerUsername: "{{User}}",
+		Shell:     "/bin/ash",
+	}
+	localConfigFile, err := os.Open("dockersh.json")
+	if err != nil {
+		err = nil
+		return
+	}
+	bytes, err := ioutil.ReadAll(localConfigFile)
+	if err != nil {
+		return
+	}
+	var localConfig map[string]interface{}
+	err = json.Unmarshal(bytes, &localConfig)
+	if err != nil {
+		return
+	}
+	localConfigFile.Close()
+
+	for k, v := range localConfig {
+		switch k {
+		case "image_name":
+			if localImageName, ok := v.(string); !ok {
+				return nil, errors.New("parse")
+			} else {
+				config.ImageName = localImageName
+			}
+		case "mount_home_to":
+			if localMountHomeTo, ok := v.(string); !ok {
+				return nil, errors.New("parse")
+			} else {
+				config.MountHomeTo = localMountHomeTo
+			}
+		case "container_username":
+			if localContainerUsername, ok := v.(string); !ok {
+				return nil, errors.New("parse")
+			} else {
+				config.ContainerUsername = localContainerUsername
+			}
+		case "shell":
+			if localShell, ok := v.(string); !ok {
+				return nil, errors.New("parse")
+			} else {
+				config.Shell = localShell
+			}
+		}
+	}
+	return config, nil
+}
 
 func main() {
 	os.Exit(realMain())
@@ -20,6 +85,11 @@ func realMain() int {
 	if !found {
 		fmt.Fprintf(os.Stderr, "nsenter is not installed\n")
 		fmt.Fprintf(os.Stderr, "run boot2docker ssh 'docker run --rm -v /var/lib/boot2docker/:/target bobtfish/nsenter'\n")
+		return 1
+	}
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return 1
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
@@ -41,7 +111,7 @@ func realMain() int {
 
 	pid, err := dockerpid(containerName)
 	if err != nil {
-		pid, err = dockerstart(user.Username, user.HomeDir, containerName, "busybox")
+		pid, err = dockerstart(user.Username, user.HomeDir, containerName, config.ImageName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
