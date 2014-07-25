@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -20,10 +20,10 @@ type configuration struct {
 
 func loadConfig() (config *configuration, err error) {
 	config = &configuration{
-		ImageName: "busybox",
-		MountHomeTo: "{{Home}}",
+		ImageName:         "busybox",
+		MountHomeTo:       "{{Home}}",
 		ContainerUsername: "{{User}}",
-		Shell:     "/bin/ash",
+		Shell:             "/bin/ash",
 	}
 	localConfigFile, err := os.Open("dockersh.json")
 	if err != nil {

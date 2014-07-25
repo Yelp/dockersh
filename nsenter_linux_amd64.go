@@ -117,7 +117,6 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	// parent will get the pid, child will be 0
 	if int(r1) != 0 {
 		// Parent
-		fmt.Fprintf(os.Stderr, "In Parent waiting for %s\n", strconv.Itoa(int(r1)))
 		proc, procerr := os.FindProcess(int(r1))
 		if procerr != nil {
 			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(r1)))
@@ -127,7 +126,6 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		if err != nil {
 			panic(fmt.Sprintf("proc.Wait failed %s", err))
 		}
-		fmt.Fprintf(os.Stderr, "parent wait finished\n")
 		if pstate.Exited() {
 			fmt.Fprintf(os.Stderr, "Child has exited\n")
 		} else {
@@ -135,7 +133,6 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		}
 		return nil
 	}
-	fmt.Fprintf(os.Stderr, "In child\n")
 	// Child
 
 	if gid > 0 {
@@ -157,11 +154,10 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 
 	args := []string{shell}
 	env := os.Environ()
-	fmt.Fprintf(os.Stderr, "Child exec\n")
 	execErr := syscall.Exec(shell, args, env)
 	if execErr != nil {
 		panic(execErr)
 	}
-	fmt.Fprintf(os.Stderr, "Exec error\n")
 	return execErr
 }
+
