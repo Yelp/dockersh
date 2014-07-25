@@ -117,10 +117,10 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	// parent will get the pid, child will be 0
 	if int(r1) != 0 {
 		// Parent
-		fmt.Fprintf(os.Stderr, "In Parent waiting for %s\n", strconv.Itoa(int(pid)))
-		proc, procerr := os.FindProcess(int(pid))
+		fmt.Fprintf(os.Stderr, "In Parent waiting for %s\n", strconv.Itoa(int(r1)))
+		proc, procerr := os.FindProcess(int(r1))
 		if procerr != nil {
-			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(pid)))
+			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(r1)))
 			panic(procerr)
 		}
 		pstate, err := proc.Wait()
@@ -139,7 +139,7 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	// Child
 
 	if gid > 0 {
-		err = syscall.Setgroups([]int{}) /* drop supplementary groups */
+		err = syscall.Setgroups([]int{}) // drop supplementary groups
 		if err != nil {
 			panic("setgroups failed")
 		}
