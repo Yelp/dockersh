@@ -1,20 +1,31 @@
 dockersh
 ========
 
-A shell which places uses into individual docker containers.
+If you want to allow multiple users to ssh onto a single box, and enter their
+own individual docker container, you normally have to run an ssh daemon in each
+container, and have a different port for each user to ssh to.
 
-This is designed to be a (semi) secure method of giving users individual docker containers
-on your host, without needing to run ssh in the containers (and have users connect to different ports).
+dockersh is a shell which can be used in /etc/passwd or as an ssh ForceCommand.  
+This allows you to have a single ssh process, on the normal ssh port, and gives
+a (semi) secure way to connect users into their own individual docker
+containers.
 
 *WARNING:* This project was implemented in 48 hours during a Yelp hackathon, it _should not_ be considered
 stable, secure or ready for production use - here be dragons. Please expect to get rooted and/or for demons
 to fly out of your nose if you use this software on a production host connected to the public internet.
 
-*SECOND WARNING:* Whilst this project goes to some effort to make users inside containers low priviliged
-(and therefore not be able to escalate their privelidge level inside containers or on the host machine),
-this is *NOT* watertight, and will not be watertight until Docker fully supports user namespaces. Notably,
+*SECOND WARNING:* Whilst this project goes to some effort to make users inside containers have lowered privileges
+and limit their ability to escalate their privilege level inside containers, or on the host machine,
+this is *NOT* watertight. It will not be watertight until Docker fully supports user namespaces. Notably,
 if you let users pick their own containers to run, they can probably do undesireable things (for example
-using a container which allows them to sudo up to root and then writing to /dev/kmem).
+using a container which allows them to sudo up to root and then writing to /dev/kmem.)
+
+Requirements
+============
+
+dockersh requires a patched version of the 'nsenter' utility. It is recommended that
+you remove any version of nsenter you have installed currently, then invoke dockersh, which will
+tell you how to install the patched version.
 
 Compiling dockersh
 ==================
@@ -23,11 +34,20 @@ You need to install golang (tested on >= 1.3), then you should just be able to r
 
     go install
 
-and a 'dockersh' binary will be generated in your $GOPATH (or .)
+and a 'dockersh' binary will be generated in your $GOPATH (or your current
+working directory if $GOPATH isn't set)
 
-NOTE: dockersh requires a patched version of the 'nsenter' utility currently. It is recommended that
-you remove any version of nsenter you have installed currently, then invoke dockersh, which will
-tell you how to install the patched version.
+Installation
+============
+
+Copy the dockersh binary to a suitable location of your choice.
+
+There are two main methods of invoking dockersh. Either:
+
+1. Put the path to dockersh into /etc/shells, and then change the users shell
+   in /etc/passwd
+1. Set dockersh as the ssh ForceCommand in the users $HOME/.ssh/config, or
+   globally in /etc/ssh/ssh_config
 
 Configuration
 =============
@@ -44,7 +64,7 @@ Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | %u/mydockersh
 mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
-container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | $USER | root
+container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container | /bin/bash | /bin/ash
 blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
 
