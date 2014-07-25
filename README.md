@@ -42,11 +42,10 @@ Local (per user) settings for a specific user's dockersh instance.
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
-container_name  | String. | Mandatory, the name of the container to launch for the user. The %u sequence will interpolate the username | busybox | %u/mydockersh
-mount_home  | Boolean. | If the user's home directory (as specified in /etc/passwd) should be mounted into the container | true | true/false
-mount_home_to | False or string. | Where to map the user's home directory inside the container | $HOME (from /etc/passwd) | /opt/home/myhomedir
+image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | %u/mydockersh
+mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | $USER | root
-shell | String | The shell that should be started for the user inside the container | /bin/sh | /bin/bash
+shell | String | The shell that should be started for the user inside the container | /bin/bash | /bin/ash
 blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
 
 /etc/xdg/dockershrc.json
