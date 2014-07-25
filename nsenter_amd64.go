@@ -23,6 +23,11 @@ func nsenterdetect() (found bool, err error) {
 	return false, err
 }
 
+const (
+	CLONE_VFORK = 0x00004000 /* set if the parent wants the child to wake it up on mm_release */
+	SIGCHLD     = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
+)
+
 func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error) {
 	// sudo nsenter --target "$PID" --mount --uts --ipc --net --pid --setuid $DESIRED_UID --setgid $DESIRED_GID --wd=$HOMEDIR -- "$REAL_SHELL"
 	//cmd := exec.Command("sudo", "/usr/local/bin/nsenter",
@@ -78,6 +83,28 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	defer namespace.Close(fd)
 
 	/* END FIXME */
+
+	// see go/src/pkg/syscall/exec_unix.go
+	syscall.ForkLock.Lock()
+
+	// Stolen from https://github.com/tobert/lnxns/blob/master/src/lnxns/nsfork_linux.go
+	r1, _, err1 := syscall.RawSyscall(syscall.SYS_CLONE, uintptr(CLONE_VFORK), 0, 0)
+
+	syscall.ForkLock.Unlock()
+
+	if err1 != 0 {
+		panic(err1)
+	}
+
+	// parent will get the pid, child will be 0
+	if int(r1) != 0 {
+		// Parent
+		proc, _ := os.FindProcess(int(pid))
+		proc.Wait()
+		return nil
+	}
+
+	// Child
 
 	if gid > 0 {
 		err = syscall.Setgroups([]int{}) /* drop supplementary groups */
