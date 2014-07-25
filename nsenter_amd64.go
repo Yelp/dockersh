@@ -30,17 +30,6 @@ const (
 )
 
 func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error) {
-	// sudo nsenter --target "$PID" --mount --uts --ipc --net --pid --setuid $DESIRED_UID --setgid $DESIRED_GID --wd=$HOMEDIR -- "$REAL_SHELL"
-	//cmd := exec.Command("sudo", "/usr/local/bin/nsenter",
-	//	"--target", strconv.Itoa(pid), "--mount", "--uts", "--ipc", "--net", "--pid",
-	//	"--setuid", strconv.Itoa(uid), "--setgid", strconv.Itoa(gid), fmt.Sprintf("--wd=%s", wd),
-	//	"--", shell)
-	//cmd.Stdin = os.Stdin
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stderr
-	//err = cmd.Run()
-	//return err
-
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
 	if rooterr != nil {
 		panic(fmt.Sprintf("Could not open fd to root: %s", rooterr))
