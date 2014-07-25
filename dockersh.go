@@ -92,7 +92,7 @@ func realMain() int {
 		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return 1
 	}
-	/* Woo! We found nsenter, now to move onto more interesting things */
+	/* Woo! We found nsenter (if needed for this OS), now to move onto more interesting things */
 	user, err := user.Current()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not get current user: %v", err)

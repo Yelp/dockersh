@@ -11,16 +11,8 @@ import (
 )
 
 func nsenterdetect() (found bool, err error) {
-	cmd := exec.Command("/usr/local/bin/nsenter")
-	err = cmd.Run()
-	if err == nil {
-		return true, nil
-	}
-	/* TODO: Figure out how to get the actual error code from here */
-	if e, ok := err.(*exec.ExitError); ok && strings.HasSuffix(e.String(), "1") {
-		return false, nil
-	}
-	return false, err
+	// We've inlined the subset of nsenter code we need for amd64 :)
+	return true, nil
 }
 
 // from /usr/include/linux/sched.h
@@ -99,10 +91,13 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 
 	/* END FIXME */
 
-	// see go/src/pkg/syscall/exec_unix.go
+	// see go/src/pkg/syscall/exec_unix.go - not sure if this is needed or not (or if we should lock a larger section)
 	syscall.ForkLock.Lock()
 
-	// Stolen from https://github.com/tobert/lnxns/blob/master/src/lnxns/nsfork_linux.go
+	/* Stolen from https://github.com/tobert/lnxns/blob/master/src/lnxns/nsfork_linux.go
+	    CLONE_VFORK implies that the parent process won't resume until the child calls Exec,
+	    which fixes the potential race conditions */
+ 
 	var flags int = SIGCHLD | CLONE_VFORK
 	r1, _, err1 := syscall.RawSyscall(syscall.SYS_CLONE, uintptr(flags), 0, 0)
 
@@ -116,13 +111,14 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 
 	// parent will get the pid, child will be 0
 	if int(r1) != 0 {
-		// Parent
+		// Parent process here
 		proc, procerr := os.FindProcess(int(r1))
 		if procerr != nil {
 			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(r1)))
 			panic(procerr)
 		}
 		pstate, err := proc.Wait()
+		// FIXME: Deal with SIGSTOP on the child in the same way nsenter does?
 		if err != nil {
 			panic(fmt.Sprintf("proc.Wait failed %s", err))
 		}
@@ -133,8 +129,11 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		}
 		return nil
 	}
-	// Child
 
+	// We're definitely in the child process by the time we get here.
+
+	// Drop groups, set to the primary group of the user.
+	// TODO: Add user's other groups from /etc/group?
 	if gid > 0 {
 		err = syscall.Setgroups([]int{}) // drop supplementary groups
 		if err != nil {
@@ -145,6 +144,7 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 			panic("setgid failed")
 		}
 	}
+	// Change uid from root down to the actual user
 	if uid > 0 {
 		err = syscall.Setuid(uid)
 		if err != nil {
@@ -152,6 +152,9 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		}
 	}
 
+	// Exec their real shell
+	// TODO: Add the ability to have arguments for the shell from config
+	// TODO: Add the ability to trim environment and/or add to environment (kinda) like sudo does
 	args := []string{shell}
 	env := os.Environ()
 	execErr := syscall.Exec(shell, args, env)
