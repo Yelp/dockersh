@@ -18,7 +18,8 @@ to fly out of your nose if you use this software on a production host connected 
 and limit their ability to escalate their privilege level inside containers, or on the host machine,
 this is *NOT* watertight. It will not be watertight until Docker fully supports user namespaces. Notably,
 if you let users pick their own containers to run, they can probably do undesireable things (for example
-using a container which allows them to sudo up to root and then writing to /dev/kmem.)
+using a container which allows them to sudo up to root and then writing to /dev/kmem.). We plan to try to
+address some of this by limiting suid/sgid permissions within containers, but YMMV.
 
 Requirements
 ============
@@ -78,8 +79,12 @@ Problems to solve
 =================
 
  * How do we deal with changed settings (i.e. when to recycle the container)
- * Getting multiple shells into the same container (use of nsenter)
- * What becomes PID 1 inside the container? (sh while loop, but zombies?)
+ * We just run an interactive shell in the root of the container, but if you 'docker attach' to it, then detach, the container goes away.
+ * Finish up config settings
+ * Decent test cases
+ * Make the darwin nsenter version less crazy
+ * suid / sgid binaries inside the container - disable
+ * Installation procedures need to be better!
 
 Contributing
 ============
