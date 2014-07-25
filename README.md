@@ -21,6 +21,9 @@ if you let users pick their own containers to run, they can probably do undesire
 using a container which allows them to sudo up to root and then writing to /dev/kmem.). We plan to try to
 address some of this by limiting suid/sgid permissions within containers, but YMMV.
 
+*THIRD WARNING:* The dockersh binary needs the suid bit set so that it can make the syscalls to adjust
+kernel namespaces, so any security issues in the code *will* allow attackers to escalate to root.
+
 Requirements
 ============
 
@@ -33,7 +36,7 @@ Compiling dockersh
 
 You need to install golang (tested on >= 1.3), then you should just be able to run:
 
-    go install
+    make
 
 and a 'dockersh' binary will be generated in your $GOPATH (or your current
 working directory if $GOPATH isn't set)
@@ -49,6 +52,8 @@ There are two main methods of invoking dockersh. Either:
    in /etc/passwd
 1. Set dockersh as the ssh ForceCommand in the users $HOME/.ssh/config, or
    globally in /etc/ssh/ssh_config
+
+*Note:* The dockersh binary needs the suid bit set to operate!
 
 Configuration
 =============
