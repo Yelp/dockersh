@@ -35,9 +35,9 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	//err = cmd.Run()
 	//return err
 
-	/* FIXME: Make these an array and loop through them, as this is gross
+	/* FIXME: Make these an array and loop through them, as this is gross */
 
-				/* --mount */
+	/* --mount */
 	fd, err := namespace.OpenProcess(pid, namespace.CLONE_NEWNS)
 	if err != nil {
 		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWNS)")
