@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# This is the initial prototype version of dockersh, just to prove that it could be done.
+
+# WARNING: This code is _entirely unsupported_ and a barely functional
+#          prototype, please use the .go version if you'd actually like
+#          to experiment with this project!
+
 # TODO: Figure out they want for a real shell
 REAL_SHELL=/bin/ash
 
