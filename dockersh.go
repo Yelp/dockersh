@@ -41,7 +41,7 @@ func realMain() int {
 
 	pid, err := dockerpid(containerName)
 	if err != nil {
-		pid, err = dockerstart(user.Username, user.HomeDir, containerName, "busybox")
+		pid, err = dockerstart(user.Username, user.HomeDir, containerName, "testcontainer")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
@@ -49,6 +49,6 @@ func realMain() int {
 	}
 	uid, err := strconv.Atoi(user.Uid)
 	gid, err := strconv.Atoi(user.Gid)
-	nsenterexec(pid, uid, gid, user.HomeDir, "/bin/sh")
+	nsenterexec(pid, uid, gid, user.HomeDir, "/testcmd.sh")
 	return 0
 }
