@@ -25,17 +25,8 @@ func nsenterdetect() (found bool, err error) {
 
 // from /usr/include/linux/sched.h
 const (
-	CLONE_FS      = 0x00000200 /* set if fs info shared between processes */
-	CLONE_FILES   = 0x00000400 /* set if open files shared between processes */
-	CLONE_NEWNS   = 0x00020000 /* New namespace group? */
-	CLONE_NEWUTS  = 0x04000000 /* New utsname group? */
-	CLONE_NEWIPC  = 0x08000000 /* New ipcs */
-	CLONE_NEWUSER = 0x10000000 /* New user namespace */
-	CLONE_NEWPID  = 0x20000000 /* New pid namespace */
-	CLONE_NEWNET  = 0x40000000 /* New network namespace */
-	CLONE_IO      = 0x80000000 /* Clone io context */
-	CLONE_VFORK   = 0x00004000 /* set if the parent wants the child to wake it up on mm_release */
-	SIGCHLD       = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
+	CLONE_VFORK = 0x00004000 /* set if the parent wants the child to wake it up on mm_release */
+	SIGCHLD     = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
 )
 
 func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error) {
@@ -50,15 +41,14 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	//err = cmd.Run()
 	//return err
 
-	fmt.Fprintf(os.Stderr, "/proc/%s/root\n", strconv.Itoa(pid))
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
 	if rooterr != nil {
 		panic(fmt.Sprintf("Could not open fd to root: %s", rooterr))
 	}
-	/*cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%i/cwd", pid))
+	cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%s/cwd", strconv.Itoa(pid)))
 	if cwderr != nil {
 		panic("Could not open fd to cwd")
-	}*/
+	}
 
 	/* FIXME: Make these an array and loop through them, as this is gross */
 
@@ -106,6 +96,11 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	if chrooterr != nil {
 		panic(fmt.Sprintf("chroot failed: %s", chrooterr))
 	}
+	// FIXME - this cwds to the cwd of the 'root' process inside the container, we probably want to cwd to user's homedir instead?
+	_, _, ecwd := syscall.Syscall(syscall.SYS_FCHDIR, cwdfd.Fd(), 0, 0)
+	if ecwd != 0 {
+		panic("cwd to working directory failed")
+	}
 
 	namespace.Close(ipcfd)
 	namespace.Close(utsfd)
@@ -133,10 +128,22 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	// parent will get the pid, child will be 0
 	if int(r1) != 0 {
 		// Parent
-		fmt.Fprintf(os.Stderr, "In Parent\n")
-		proc, _ := os.FindProcess(int(pid))
-		proc.Wait()
+		fmt.Fprintf(os.Stderr, "In Parent waiting for %s\n", strconv.Itoa(int(pid)))
+		proc, procerr := os.FindProcess(int(pid))
+		if procerr != nil {
+			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(pid)))
+			panic(procerr)
+		}
+		pstate, err := proc.Wait()
+		if err != nil {
+			panic(fmt.Sprintf("proc.Wait failed %s", err))
+		}
 		fmt.Fprintf(os.Stderr, "parent wait finished\n")
+		if pstate.Exited() {
+			fmt.Fprintf(os.Stderr, "Child has exited\n")
+		} else {
+			fmt.Fprintf(os.Stderr, "Child has NOT exited\n")
+		}
 		return nil
 	}
 	fmt.Fprintf(os.Stderr, "In child\n")
