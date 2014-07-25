@@ -1,7 +1,20 @@
 dockersh
 ========
 
-A shell which places uses into individual docker containers
+A shell which places uses into individual docker containers.
+
+This is designed to be a (semi) secure method of giving users individual docker containers
+on your host, without needing to run ssh in the containers (and have users connect to different ports).
+
+*WARNING:* This project was implemented in 48 hours during a Yelp hackathon, it _should not_ be considered
+stable, secure or ready for production use - here be dragons. Please expect to get rooted and/or for demons
+to fly out of your nose if you use this software on a production host connected to the public internet.
+
+*SECOND WARNING:* Whilst this project goes to some effort to make users inside containers low priviliged
+(and therefore not be able to escalate their privelidge level inside containers or on the host machine),
+this is *NOT* watertight, and will not be watertight until Docker fully supports user namespaces. Notably,
+if you let users pick their own containers to run, they can probably do undesireable things (for example
+using a container which allows them to sudo up to root and then writing to /dev/kmem).
 
 Compiling dockersh
 ==================
