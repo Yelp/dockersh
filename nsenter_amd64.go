@@ -37,12 +37,12 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 
 	/* FIXME: Make these an array and loop through them, as this is gross */
 
-	/* --mount */
-	fd, err := namespace.OpenProcess(pid, namespace.CLONE_NEWNS)
+	/* --ipc */
+	fd, err := namespace.OpenProcess(pid, namespace.CLONE_NEWIPC)
 	if err != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWNS)")
+		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWIPC)")
 	}
-	namespace.Setns(fd, namespace.CLONE_NEWNS)
+	namespace.Setns(fd, namespace.CLONE_NEWIPC)
 	namespace.Close(fd)
 
 	/* --uts */
@@ -51,14 +51,6 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWUTS)")
 	}
 	namespace.Setns(fd, namespace.CLONE_NEWUTS)
-	namespace.Close(fd)
-
-	/* --ipc */
-	fd, err = namespace.OpenProcess(pid, namespace.CLONE_NEWIPC)
-	if err != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWIPC)")
-	}
-	namespace.Setns(fd, namespace.CLONE_NEWIPC)
 	namespace.Close(fd)
 
 	/* --net */
@@ -75,6 +67,14 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWPID)")
 	}
 	namespace.Setns(fd, namespace.CLONE_NEWPID)
+	namespace.Close(fd)
+
+	/* --mount */
+	fd, err = namespace.OpenProcess(pid, namespace.CLONE_NEWNS)
+	if err != nil {
+		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWNS)")
+	}
+	namespace.Setns(fd, namespace.CLONE_NEWNS)
 	namespace.Close(fd)
 
 	/* END FIXME */
