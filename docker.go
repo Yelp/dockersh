@@ -9,25 +9,25 @@ import (
 	"strings"
 )
 
-func dockerpid(name string) (pid int, err error, out string) {
+func dockerpid(name string) (pid int, err error) {
 	cmd := exec.Command("docker", "inspect", "--format", "{{.State.Pid}}", name)
 	output, err := cmd.Output()
 	if err != nil {
-		return -1, err, string(output)
+		return -1, errors.New(err.Error() + ":\n" + string(output))
 	}
 
-	pid, e := strconv.Atoi(strings.TrimSpace(string(output)))
+	pid, err = strconv.Atoi(strings.TrimSpace(string(output)))
 
-	if e != nil {
-		return -1, e, string(output)
+	if err != nil {
+		return -1, errors.New(err.Error() + ":\n" + string(output))
 	}
 	if pid == 0 {
-		return -1, errors.New("Invalid PID"), string(output)
+		return -1, errors.New("Invalid PID")
 	}
-	return pid, nil, string(output)
+	return pid, nil
 }
 
-func dockerstart(username string, homedir string, name string, container string) (pid int, err error, out string) {
+func dockerstart(username string, homedir string, name string, container string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", "--name", name)
 	err = cmd.Run()
 
@@ -39,7 +39,7 @@ func dockerstart(username string, homedir string, name string, container string)
 	cmd.Stderr = &output
 	err = cmd.Run()
 	if err != nil {
-		return -1, err, output.String()
+		return -1, errors.New(err.Error() + ":\n" + output.String())
 	}
 	return dockerpid(name)
 }

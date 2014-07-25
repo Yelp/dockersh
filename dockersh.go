@@ -23,32 +23,32 @@ func realMain() int {
 		return 1
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
-	u, err2 := user.Current()
-	if err2 != nil {
-		fmt.Fprintf(os.Stderr, "Current: %v", err2)
-	}
-	if u.HomeDir == "" {
-		fmt.Fprintf(os.Stderr, "didn't get a HomeDir")
-	}
-	if u.Username == "" {
-		fmt.Fprintf(os.Stderr, "didn't get a username")
-	}
-
-	var container_name = fmt.Sprintf("%s_dockersh", u.Username)
-
-	pid, err, out := dockerpid(container_name)
+	user, err := user.Current()
 	if err != nil {
-		pid, err, out = dockerstart(u.Username, u.HomeDir, container_name, "busybox")
+		fmt.Fprintf(os.Stderr, "could not get current user: %v", err)
+		return 1
+	}
+	if user.HomeDir == "" {
+		fmt.Fprintf(os.Stderr, "didn't get a home directory")
+		return 1
+	}
+	if user.Username == "" {
+		fmt.Fprintf(os.Stderr, "didn't get a username")
+		return 1
+	}
+
+	containerName := fmt.Sprintf("%s_dockersh", user.Username)
+
+	pid, err := dockerpid(containerName)
+	if err != nil {
+		pid, err = dockerstart(user.Username, user.HomeDir, containerName, "busybox")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cound not start container: %s: %s\n", err, out)
+			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
 		}
 	}
-	// pid int, uid int, git int, wd string, shell string
-	var uid int
-	uid, err = strconv.Atoi(u.Uid)
-	var gid int
-	gid, err = strconv.Atoi(u.Gid)
-	nsenterexec(pid, uid, gid, u.HomeDir, "/bin/ash")
+	uid, err := strconv.Atoi(user.Uid)
+	gid, err := strconv.Atoi(user.Gid)
+	nsenterexec(pid, uid, gid, user.HomeDir, "/bin/ash")
 	return 0
 }
