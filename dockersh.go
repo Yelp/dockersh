@@ -49,6 +49,6 @@ func realMain() int {
 	}
 	uid, err := strconv.Atoi(user.Uid)
 	gid, err := strconv.Atoi(user.Gid)
-	nsenterexec(pid, uid, gid, user.HomeDir, "/bin/ash")
+	nsenterexec(pid, uid, gid, user.HomeDir, "/bin/sh")
 	return 0
 }
