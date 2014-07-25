@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
 	"os"
-	"os/exec"
 	"strconv"
-	"strings"
 	"syscall"
 )
 
@@ -95,9 +93,9 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	syscall.ForkLock.Lock()
 
 	/* Stolen from https://github.com/tobert/lnxns/blob/master/src/lnxns/nsfork_linux.go
-	    CLONE_VFORK implies that the parent process won't resume until the child calls Exec,
-	    which fixes the potential race conditions */
- 
+	   CLONE_VFORK implies that the parent process won't resume until the child calls Exec,
+	   which fixes the potential race conditions */
+
 	var flags int = SIGCHLD | CLONE_VFORK
 	r1, _, err1 := syscall.RawSyscall(syscall.SYS_CLONE, uintptr(flags), 0, 0)
 
@@ -163,4 +161,3 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	}
 	return execErr
 }
-
