@@ -16,8 +16,11 @@ func nsenterdetect() (found bool, err error) {
 	}
 	/* TODO: Figure out how to get the actual error code from here */
 	if e, ok := err.(*exec.ExitError); ok && strings.HasSuffix(e.String(), "1") {
-		return false, nil
+		fmt.Fprintf(os.Stderr, "nsenter is not installed\n")
+		fmt.Fprintf(os.Stderr, "run boot2docker ssh 'docker run --rm -v /var/lib/boot2docker/:/target bobtfish/nsenter'\n")
+		return false, err
 	}
+	fmt.Fprintf(os.Stderr, "cound not detect if nsenter was installed: %s\n", err)
 	return false, err
 }
 
