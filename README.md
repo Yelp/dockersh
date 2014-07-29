@@ -71,7 +71,7 @@ Setting name  | Type | Description | Default value | Example value
 image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | %u/mydockersh
 mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
-shell | String | The shell that should be started for the user inside the container | /bin/bash | /bin/ash
+shell | String | The shell that should be started for the user inside the container. | /bin/bash | /bin/ash
 blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
 
 /etc/xdg/dockershrc.json
@@ -86,6 +86,7 @@ Problems to solve
  * How do we deal with changed settings (i.e. when to recycle the container)
  * We just run an interactive shell in the root of the container, but if you 'docker attach' to it, then detach, the container goes away.
  * Finish up config settings
+   * Notably, fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
  * Decent test cases
  * Make the darwin nsenter version less crazy
  * suid / sgid binaries inside the container - disable
