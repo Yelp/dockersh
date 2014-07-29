@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type configuration struct {
@@ -23,10 +24,10 @@ type configInterpolation struct {
 
 func loadConfig() (config *configuration, err error) {
 	config = &configuration{
-		ImageName:         "busybox",
-		MountHomeTo:       "{{.Home}}",
-		ContainerUsername: "{{.User}}",
-		Shell:             "/bin/ash",
+		ImageName:         "ubuntu",
+		MountHomeTo:       "%h",
+		ContainerUsername: "%u",
+		Shell:             "%s",
 	}
 	localConfigFile, err := os.Open("dockersh.json")
 	if err != nil {
@@ -80,7 +81,8 @@ func main() {
 }
 
 func tmplConfigVar(template string, v *configInterpolation) string {
-	return template
+	shell := "/bin/bash"
+	return strings.Replace(strings.Replace(strings.Replace(template, "%h", v.Home, -1), "%u", v.User, -1), "%s", shell, -1)
 }
 
 func realMain() int {
