@@ -16,11 +16,16 @@ type configuration struct {
 	BlacklistUserConfig []string `json:"blacklist_user_config"`
 }
 
+type configInterpolation struct {
+	Home string
+	User string
+}
+
 func loadConfig() (config *configuration, err error) {
 	config = &configuration{
 		ImageName:         "busybox",
-		MountHomeTo:       "{{Home}}",
-		ContainerUsername: "{{User}}",
+		MountHomeTo:       "{{.Home}}",
+		ContainerUsername: "{{.User}}",
 		Shell:             "/bin/ash",
 	}
 	localConfigFile, err := os.Open("dockersh.json")
@@ -74,6 +79,10 @@ func main() {
 	os.Exit(realMain())
 }
 
+func tmplConfigVar(template string, v *configInterpolation) string {
+	return template
+}
+
 func realMain() int {
 	_, err := nsenterdetect()
 	if err != nil {
@@ -86,17 +95,22 @@ func realMain() int {
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
 	username, homedir, uid, gid, err := getCurrentUser()
+	configInterpolations := configInterpolation{homedir, username}
 
-	containerName := fmt.Sprintf("%s_dockersh", username)
+	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
+	realHomedir := tmplConfigVar(config.MountHomeTo, &configInterpolations)
+	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
+	realShell := tmplConfigVar(config.Shell, &configInterpolations)
+	containerName := fmt.Sprintf("%s_dockersh", realUsername)
 
 	pid, err := dockerpid(containerName)
 	if err != nil {
-		pid, err = dockerstart(username, homedir, containerName, config.ImageName)
+		pid, err = dockerstart(realUsername, realHomedir, containerName, realImageName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
 		}
 	}
-	nsenterexec(pid, uid, gid, homedir, "/bin/ash")
+	nsenterexec(pid, uid, gid, realHomedir, realShell)
 	return 0
 }
