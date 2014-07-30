@@ -120,10 +120,8 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		if err != nil {
 			panic(fmt.Sprintf("proc.Wait failed %s", err))
 		}
-		if pstate.Exited() {
-			fmt.Fprintf(os.Stderr, "Child has exited\n")
-		} else {
-			fmt.Fprintf(os.Stderr, "Child has NOT exited\n")
+		if !pstate.Exited() {
+			panic("Child has NOT exited")
 		}
 		return nil
 	}
