@@ -58,6 +58,9 @@ There are two main methods of invoking dockersh. Either:
 Configuration
 =============
 
+NOTE: Currently, the presense of ~/.dockersh.json will _entirely_ override the global config file, settings not present in ~/.dockersh.json
+will *not* be merged from global config!
+
 ~/.dockersh.json
 ----------------
 
