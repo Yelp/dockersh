@@ -28,7 +28,7 @@ func dockerpid(name string) (pid int, err error) {
 }
 
 func dockerstart(username string, homedir string, name string, container string) (pid int, err error) {
-	cmd := exec.Command("docker", "rm", "--name", name)
+	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
 	// docker run -t -i -u $DESIRED_USER --hostname="$MYHOSTNAME" --name="$DOCKER_NAME" -v $HOMEDIR:$HOMEDIR:rw -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -d "$DOCKER_CONTAINER"
