@@ -24,7 +24,9 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	if rooterr != nil {
 		panic(fmt.Sprintf("Could not open fd to root: %s", rooterr))
 	}
-	cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%s/cwd", strconv.Itoa(pid)))
+	// Find the user's homw directory (which should be bound in as a volume) in the
+	// container process namespace, so we can chdir there later.
+	cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), wd))
 	if cwderr != nil {
 		panic("Could not open fd to cwd")
 	}
