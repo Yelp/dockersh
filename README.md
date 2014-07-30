@@ -1,14 +1,47 @@
 dockersh
 ========
 
-If you want to allow multiple users to ssh onto a single box, and enter their
-own individual docker container, you normally have to run an ssh daemon in each
-container, and have a different port for each user to ssh to.
+A user shell for isolated environments.
 
-dockersh is a shell which can be used in /etc/passwd or as an ssh ForceCommand.  
+What is this?
+=============
+
+dockersh is designed to be used as a login shell on machines with multiple interactive users.
+
+When a user invokes dockersh, it will bring up a Docker container (if not already running), and
+then spawn a new interactive shell in the container's namespace.
+
+dockersh can be used as a shell in /etc/passwd or as an ssh ForceCommand.
+
 This allows you to have a single ssh process, on the normal ssh port, and gives
 a (semi) secure way to connect users into their own individual docker
 containers.
+
+Why do I want this?
+===================
+
+You want to allow multiple users to ssh onto a single box, but you'd like some isolation
+between those users. With dockersh each user enters their
+own individual docker container (acting like a lightweight VM), with their homedirectory mounted from the host
+system (so that user data is persistent between container restarts), but with it's own kernel namespaces for
+processes and networking.
+
+This can be used for more easily seperating each user's processes from the rest of the system
+and having further per user constraints (e.g. memory limit all of the user's processes,
+or limit their aggregate bandwidth etc)
+
+Normally to give users individual containers you have to run an ssh daemon in each
+container, and either have have a different port for each user to ssh to or some nasty
+Forcecommand hacks (which only work with agent forwarding from the client).
+
+Dockersh eliminates the need for any of these techiques by acting like a regular
+shell which can be used in /etc/passwd or as an ssh ForceCommand.  
+This allows you to have a single ssh process, on the normal ssh port, and gives
+a (hopefully) secure way to connect users into their own individual docker
+containers.
+
+SECURITY WARNING
+================
 
 *WARNING:* This project was implemented in 48 hours during a Yelp hackathon, it _should not_ be considered
 stable, secure or ready for production use - here be dragons. Please expect to get rooted and/or for demons
@@ -18,11 +51,11 @@ to fly out of your nose if you use this software on a production host connected 
 and limit their ability to escalate their privilege level inside containers, or on the host machine,
 this is *NOT* watertight. It will not be watertight until Docker fully supports user namespaces. Notably,
 if you let users pick their own containers to run, they can probably do undesireable things (for example
-using a container which allows them to sudo up to root and then writing to /dev/kmem.). We plan to try to
+using a container which allows them to sudo up to root and then writing to /dev/kmem.). We *plan to* try to
 address some of this by limiting suid/sgid permissions within containers, but YMMV.
 
 *THIRD WARNING:* The dockersh binary needs the suid bit set so that it can make the syscalls to adjust
-kernel namespaces, so any security issues in the code *will* allow attackers to escalate to root.
+kernel namespaces, so any security issues in this code *will* allow attackers to escalate to root.
 
 Requirements
 ============
