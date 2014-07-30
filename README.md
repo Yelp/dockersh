@@ -27,24 +27,53 @@ kernel namespaces, so any security issues in the code *will* allow attackers to 
 Requirements
 ============
 
-dockersh requires a patched version of the 'nsenter' utility. It is recommended that
+amd64 platforms
+---------------
+
+Compiles down into a single binary with no external dependencies - see 'Compiling dockersh' below.
+
+darwin
+------
+
+dockersh tries to support Mac environments e.g. boot2docker (however at this time the solution is less
+optimum).
+
+dockersh requires a patched version of the 'nsenter' utility on the target machine *if* you want to
+use it from darwin (E.g. in boot2docker). This version of nsenter needs to be installed inside the
+boot2docker VM.
+
+It is recommended that
 you remove any version of nsenter you have installed currently, then invoke dockersh, which will
 tell you how to install the patched version.
 
-Compiling dockersh
-==================
+Installation
+============
+
+With docker
+-----------
+
+(This is the recommended method).
+Build the Dockerfile in the local directory into an image, and run it like this:
+
+    $ docker build .
+    # Progress, takes a while the first time..
+    ....
+    Successfully built 3006a08eef2e 
+    $ docker run -v /usr/local/bin:/target 3006a08eef2e
+
+Without docker
+--------------
 
 You need to install golang (tested on >= 1.3), then you should just be able to run:
 
     make
 
 and a 'dockersh' binary will be generated in your $GOPATH (or your current
-working directory if $GOPATH isn't set)
+working directory if $GOPATH isn't set). N.B. This binary needs to be moved to where
+you would like to install it, and set user + suid
 
-Installation
-============
-
-Copy the dockersh binary to a suitable location of your choice.
+Invoking dockersh
+=================
 
 There are two main methods of invoking dockersh. Either:
 
@@ -87,17 +116,18 @@ Setting name  | Type | Description | Default value | Example value
 disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
 blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
 
-Problems to solve
-=================
+TODO List
+=========
 
  * How do we deal with changed settings (i.e. when to recycle the container)
  * We just run an interactive shell in the root of the container, but if you 'docker attach' to it, then detach, the container goes away.
  * Finish up config settings
-   * Notably, fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
+   * Fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
+   * Add config merging (so user can override global)
+   * Add global user config lock out settings
  * Decent test cases
  * Make the darwin nsenter version less crazy
  * suid / sgid binaries inside the container - disable
- * Installation procedures need to be better!
 
 Contributing
 ============
