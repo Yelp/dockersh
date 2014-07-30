@@ -22,15 +22,17 @@ type configInterpolation struct {
 	User string
 }
 
-func loadConfig() (config *configuration, err error) {
+func loadConfig(filename string) (config *configuration, found bool, err error) {
+	found = true
 	config = &configuration{
 		ImageName:         "ubuntu",
 		MountHomeTo:       "%h",
 		ContainerUsername: "%u",
 		Shell:             "%s",
 	}
-	localConfigFile, err := os.Open("dockersh.json")
+	localConfigFile, err := os.Open(filename)
 	if err != nil {
+		found = false
 		err = nil
 		return
 	}
@@ -49,31 +51,31 @@ func loadConfig() (config *configuration, err error) {
 		switch k {
 		case "image_name":
 			if localImageName, ok := v.(string); !ok {
-				return nil, errors.New("parse")
+				return nil, found, errors.New("parse")
 			} else {
 				config.ImageName = localImageName
 			}
 		case "mount_home_to":
 			if localMountHomeTo, ok := v.(string); !ok {
-				return nil, errors.New("parse")
+				return nil, found, errors.New("parse")
 			} else {
 				config.MountHomeTo = localMountHomeTo
 			}
 		case "container_username":
 			if localContainerUsername, ok := v.(string); !ok {
-				return nil, errors.New("parse")
+				return nil, found, errors.New("parse")
 			} else {
 				config.ContainerUsername = localContainerUsername
 			}
 		case "shell":
 			if localShell, ok := v.(string); !ok {
-				return nil, errors.New("parse")
+				return nil, found, errors.New("parse")
 			} else {
 				config.Shell = localShell
 			}
 		}
 	}
-	return config, nil
+	return config, found, nil
 }
 
 func main() {
@@ -90,13 +92,24 @@ func realMain() int {
 	if err != nil {
 		return 1
 	}
-	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return 1
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
 	username, homedir, uid, gid, err := getCurrentUser()
+	config, found, err := loadConfig(fmt.Sprintf("%s/.dockersh.json", homedir))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
+		return 1
+	}
+	if !found {
+		config, found, err = loadConfig("/etc/dockersh.json")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not load config: %v", err)
+			return 1
+		}
+	}
 	configInterpolations := configInterpolation{homedir, username}
 
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)

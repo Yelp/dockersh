@@ -58,11 +58,8 @@ There are two main methods of invoking dockersh. Either:
 Configuration
 =============
 
-We use the [XDG](http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html)
-specification for configuration file locations. The default config file locations are shown below
-
-~/.config/dockersh.json
------------------------
+~/.dockersh.json
+----------------
 
 Local (per user) settings for a specific user's dockersh instance.
 
@@ -72,13 +69,20 @@ image_name  | String | Mandatory, the name of the image to launch for the user. 
 mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/bash | /bin/ash
-blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
 
-/etc/xdg/dockershrc.json
-------------------------
+
+/etc/dockershrc.json
+--------------------
 
 Global settings for all dockersh instances. Allows you to disable settings
-in the per-user dockersh.json 
+in the per-user ~/.dockersh.json
+
+N.B *TODO* Not yet implemented, reading both config files, and allowing the global one to blacklist local settings:
+
+Setting name  | Type | Description | Default value | Example value
+------------- | ---- | ----------- | ------------- | -------------
+disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
+blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
 
 Problems to solve
 =================
