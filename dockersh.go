@@ -48,31 +48,19 @@ func loadConfig(filename string) (config *configuration, found bool, err error) 
 	localConfigFile.Close()
 
 	for k, v := range localConfig {
+		data, ok := v.(string)
+		if !ok {
+			return nil, found, errors.New("parse")
+		}
 		switch k {
 		case "image_name":
-			if localImageName, ok := v.(string); !ok {
-				return nil, found, errors.New("parse")
-			} else {
-				config.ImageName = localImageName
-			}
+			config.ImageName = data
 		case "mount_home_to":
-			if localMountHomeTo, ok := v.(string); !ok {
-				return nil, found, errors.New("parse")
-			} else {
-				config.MountHomeTo = localMountHomeTo
-			}
+			config.MountHomeTo = data
 		case "container_username":
-			if localContainerUsername, ok := v.(string); !ok {
-				return nil, found, errors.New("parse")
-			} else {
-				config.ContainerUsername = localContainerUsername
-			}
+			config.ContainerUsername = data
 		case "shell":
-			if localShell, ok := v.(string); !ok {
-				return nil, found, errors.New("parse")
-			} else {
-				config.Shell = localShell
-			}
+			config.Shell = data
 		}
 	}
 	return config, found, nil
