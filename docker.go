@@ -31,8 +31,8 @@ func dockerstart(username string, homedir string, name string, container string)
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
-	// docker run -t -i -u $DESIRED_USER --hostname="$MYHOSTNAME" --name="$DOCKER_NAME" -v $HOMEDIR:$HOMEDIR:rw -v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -d "$DOCKER_CONTAINER"
-	cmd = exec.Command("docker", "run", "-t", "-i", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir), "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro", "--name", name, "-d", container)
+    // FIXME - Hard coded shell.
+	cmd = exec.Command("docker", "run", "-d", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir), "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro", "--name", name, "--entrypoint", "/bin/bash", container, "-c", "while [ 1 == 1 ]; do sleep 60; done")
 
 	var output bytes.Buffer
 	cmd.Stdout = &output
