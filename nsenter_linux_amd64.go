@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
+	"github.com/docker/libcontainer/security/capabilities"
 	"os"
 	"strconv"
 	"syscall"
@@ -134,6 +135,27 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	}
 
 	// We're definitely in the child process by the time we get here.
+
+	// Drop capabilities except those in the whitelist, from https://github.com/docker/docker/blob/master/daemon/execdriver/native/template/default_template.go
+	cape := capabilities.DropBoundingSet([]string{
+		"CHOWN",
+		"DAC_OVERRIDE",
+		"FSETID",
+		"FOWNER",
+		//"MKNOD",
+		//"NET_RAW",
+		//"SETGID",
+		//"SETUID",
+		"SETFCAP",
+		"SETPCAP",
+		"NET_BIND_SERVICE",
+		"SYS_CHROOT",
+		"KILL",
+		"AUDIT_WRITE",
+	})
+	if cape != nil {
+		panic(cape)
+	}
 
 	// Drop groups, set to the primary group of the user.
 	// TODO: Add user's other groups from /etc/group?
