@@ -117,11 +117,10 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(r1)))
 			panic(procerr)
 		}
-		pstate, err := proc.Wait()
+		pstate, _ := proc.Wait()
 		// FIXME: Deal with SIGSTOP on the child in the same way nsenter does?
-		if err != nil {
-			panic(fmt.Sprintf("proc.Wait failed %s", err))
-		}
+		/* FIXME: Wait can detect if the child (immediately) fails, but better to do
+			  that reporting in the child process? Not sure, don't like throwing away err */
 		if !pstate.Exited() {
 			panic("Child has NOT exited")
 		}
