@@ -120,9 +120,6 @@ There are two main methods of invoking dockersh. Either:
 Configuration
 =============
 
-NOTE: Currently, the presense of ~/.dockersh.json will _entirely_ override the global config file, settings not present in ~/.dockersh.json
-will *not* be merged from global config!
-
 ~/.dockersh.json
 ----------------
 
@@ -142,7 +139,7 @@ shell | String | The shell that should be started for the user inside the contai
 Global settings for all dockersh instances. Allows you to disable settings
 in the per-user ~/.dockersh.json
 
-N.B *TODO* Not yet implemented, reading both config files, and allowing the global one to blacklist local settings:
+N.B *TODO* Not yet implemented, allowing the global one to blacklist local settings:
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
@@ -156,7 +153,6 @@ TODO List
  * We just run an interactive shell in the root of the container, but if you 'docker attach' to it, then detach, the container goes away.
  * Finish up config settings
    * Fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
-   * Add config merging (so user can override global)
    * Add global user config lock out settings
  * Decent test cases
  * Make the darwin nsenter version less crazy

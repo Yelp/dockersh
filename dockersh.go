@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type configuration struct {
+type Configuration struct {
 	ImageName           string   `json:"image_name"`
 	MountHomeTo         string   `json:"mount_home_to"`
 	ContainerUsername   string   `json:"container_username"`
@@ -22,17 +22,11 @@ type configInterpolation struct {
 	User string
 }
 
-func loadConfig(filename string) (config *configuration, found bool, err error) {
-	found = true
-	config = &configuration{
-		ImageName:         "ubuntu",
-		MountHomeTo:       "%h",
-		ContainerUsername: "%u",
-		Shell:             "%s",
-	}
+var defaultConfig = Configuration{ImageName: "ubuntu", MountHomeTo: "%h", ContainerUsername: "%u", Shell: "%s"}
+
+func loadConfig(filename string, config *Configuration) (err error) {
 	localConfigFile, err := os.Open(filename)
 	if err != nil {
-		found = false
 		err = nil
 		return
 	}
@@ -50,7 +44,7 @@ func loadConfig(filename string) (config *configuration, found bool, err error) 
 	for k, v := range localConfig {
 		data, ok := v.(string)
 		if !ok {
-			return nil, found, errors.New("parse")
+			return errors.New("parse")
 		}
 		switch k {
 		case "image_name":
@@ -63,7 +57,7 @@ func loadConfig(filename string) (config *configuration, found bool, err error) 
 			config.Shell = data
 		}
 	}
-	return config, found, nil
+	return nil
 }
 
 func main() {
@@ -86,20 +80,18 @@ func realMain() int {
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
 	username, homedir, uid, gid, err := getCurrentUser()
-	config, found, err := loadConfig(fmt.Sprintf("%s/.dockersh.json", homedir))
+	var config = defaultConfig
+	err = loadConfig("/etc/dockersh.json", &config)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return 1
 	}
-	if !found {
-		config, found, err = loadConfig("/etc/dockersh.json")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-			return 1
-		}
+	err = loadConfig(fmt.Sprintf("%s/.dockersh.json", homedir), &config)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
+		return 1
 	}
 	configInterpolations := configInterpolation{homedir, username}
-
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
 	realHomedir := tmplConfigVar(config.MountHomeTo, &configInterpolations)
 	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
