@@ -31,6 +31,12 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		panic("Could not open fd to cwd")
 	}
 
+	// FIXME - PATH TRAVERSAL SECURITY VULNERABILITY RIGHT HERE
+	/*_, shellerr := os.Open(fmt.Sprintf("/proc/%s/root%s", shell))
+	if shellerr != nil {
+		panic(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
+	}*/
+
 	/* FIXME: Make these an array and loop through them, as this is gross */
 
 	/* --ipc */
@@ -120,7 +126,7 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		pstate, _ := proc.Wait()
 		// FIXME: Deal with SIGSTOP on the child in the same way nsenter does?
 		/* FIXME: Wait can detect if the child (immediately) fails, but better to do
-			  that reporting in the child process? Not sure, don't like throwing away err */
+		that reporting in the child process? Not sure, don't like throwing away err */
 		if !pstate.Exited() {
 			panic("Child has NOT exited")
 		}
