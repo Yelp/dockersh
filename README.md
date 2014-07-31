@@ -151,7 +151,7 @@ TODO List
 =========
 
  * How do we deal with changed settings (i.e. when to recycle the container)
- * We just run an interactive shell in the root of the container, but if you 'docker attach' to it, then detach, the container goes away.
+ * Fix hard coding of bash and bash loop as the persistent process
  * Finish up config settings
    * Fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
    * Add global user config lock out settings
