@@ -32,7 +32,8 @@ func dockerstart(username string, homedir string, name string, container string)
 	err = cmd.Run()
 
     // FIXME - Hard coded shell.
-	cmd = exec.Command("docker", "run", "-d", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir), "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro", "--name", name, "--entrypoint", "/bin/bash", container, "-c", "while [ 1 == 1 ]; do sleep 60; done")
+    // FIXME - Binding /tmp to host, can we get ssh working a better way?
+	cmd = exec.Command("docker", "run", "-d", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir), "-v", "/tmp:/tmp", "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro", "--name", name, "--entrypoint", "/bin/bash", container, "-c", "while [ 1 == 1 ]; do sleep 60; done")
 
 	var output bytes.Buffer
 	cmd.Stdout = &output
