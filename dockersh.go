@@ -39,12 +39,16 @@ func loadConfig(filename string, config *Configuration) (err error) {
 	if err != nil {
 		return
 	}
+	localConfigFile.Close()
+	return (loadConfigFromString(bytes, config))
+}
+
+func loadConfigFromString(bytes []byte, config *Configuration) (err error) {
 	var localConfig map[string]interface{}
 	err = json.Unmarshal(bytes, &localConfig)
 	if err != nil {
 		return
 	}
-	localConfigFile.Close()
 
 	for k, v := range localConfig {
 		data, ok := v.(string)
