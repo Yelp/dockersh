@@ -29,17 +29,31 @@ func dockerpid(name string) (pid int, err error) {
 	return pid, nil
 }
 
-func dockerstart(username string, homedir string, name string, container string) (pid int, err error) {
+func dockerstart(username string, homedir string, name string, container string, bindtmp bool, bindhome bool, init string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
+	bind_self_as_init := false
+	if init == "internal" {
+		init = "/sbin/init"
+		bind_self_as_init = true
+	}
 	this_binary, _ := filepath.Abs(os.Args[0])
 	// FIXME - Binding /tmp to host, can we get ssh working a better way?
-	cmd = exec.Command("docker", "run", "-d", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir),
-		"-v", "/tmp:/tmp", "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro",
-		"-v", this_binary+":/sbin/init", "--name", name,
-		"--entrypoint", "/sbin/init", container, "--")
-
+	var cmdtxt = []string{"run", "-d", "-u", username
+		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro"}
+	
+	if bindtmp {
+		cmdtxt = append(cmdtxt, "-v", "/tmp:/tmp")
+	}
+	if bindhome {
+		cmdtxt = append(cmdtxt, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir))
+	}
+	if bind_self_as_init {
+  		cmdtxt = append(cmdtxt, "-v", this_binary+":/sbin/init")
+	}
+	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container, "--")
+	cmd = exec.Command("docker", cmdtxt...)
 	var output bytes.Buffer
 	cmd.Stdout = &output
 	cmd.Stderr = &output

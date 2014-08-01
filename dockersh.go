@@ -111,7 +111,8 @@ func realMain() int {
 
 	pid, err := dockerpid(containerName)
 	if err != nil {
-		pid, err = dockerstart(realUsername, realHomedir, containerName, realImageName)
+		// bools are bindtmp, bindhome, last string is the init process
+		pid, err = dockerstart(realUsername, realHomedir, containerName, realImageName, true, true, "internal")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
