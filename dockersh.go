@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 type Configuration struct {
@@ -61,7 +63,16 @@ func loadConfig(filename string, config *Configuration) (err error) {
 }
 
 func main() {
-	os.Exit(realMain())
+	fmt.Fprintf(os.Stdout, "starting dockersh root process\n")
+	if os.Args[0] == "/sbin/init" {
+		// Wait for terminating signal
+		sc := make(chan os.Signal, 2)
+		signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
+		<-sc
+		os.Exit(0)
+	} else {
+		os.Exit(realMain())
+	}
 }
 
 func tmplConfigVar(template string, v *configInterpolation) string {

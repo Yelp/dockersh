@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -31,9 +33,12 @@ func dockerstart(username string, homedir string, name string, container string)
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
-    // FIXME - Hard coded shell.
-    // FIXME - Binding /tmp to host, can we get ssh working a better way?
-	cmd = exec.Command("docker", "run", "-d", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir), "-v", "/tmp:/tmp", "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro", "--name", name, "--entrypoint", "/bin/bash", container, "-c", "while [ 1 == 1 ]; do sleep 60; done")
+	this_binary, _ := filepath.Abs(os.Args[0])
+	// FIXME - Binding /tmp to host, can we get ssh working a better way?
+	cmd = exec.Command("docker", "run", "-d", "-u", username, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir),
+		"-v", "/tmp:/tmp", "-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro",
+		"-v", this_binary+":/sbin/init", "--name", name,
+		"--entrypoint", "/sbin/init", container, "--")
 
 	var output bytes.Buffer
 	cmd.Stdout = &output

@@ -151,12 +151,12 @@ TODO List
 =========
 
  * How do we deal with changed settings (i.e. when to recycle the container)
- * Fix hard coding of bash and bash loop as the persistent process
  * Finish up config settings
+   * Make binding /tmp a config setting
    * Fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
    * Add global user config lock out settings
  * Decent test cases
- * Make the darwin nsenter version less crazy
+ * Make the darwin nsenter version less crazy - or kill as less features?
 
 Contributing
 ============
