@@ -129,6 +129,8 @@ Local (per user) settings for a specific user's dockersh instance.
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | %u/mydockersh
+mount_home | String | If the users home directory should be mounted in the target container | true | false
+mount_tmp | String | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
 mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/bash | /bin/ash
