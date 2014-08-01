@@ -40,9 +40,9 @@ func dockerstart(username string, homedir string, name string, container string,
 	}
 	this_binary, _ := filepath.Abs(os.Args[0])
 	// FIXME - Binding /tmp to host, can we get ssh working a better way?
-	var cmdtxt = []string{"run", "-d", "-u", username
+	var cmdtxt = []string{"run", "-d", "-u", username,
 		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro"}
-	
+
 	if bindtmp {
 		cmdtxt = append(cmdtxt, "-v", "/tmp:/tmp")
 	}
@@ -50,7 +50,7 @@ func dockerstart(username string, homedir string, name string, container string,
 		cmdtxt = append(cmdtxt, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir))
 	}
 	if bind_self_as_init {
-  		cmdtxt = append(cmdtxt, "-v", this_binary+":/sbin/init")
+		cmdtxt = append(cmdtxt, "-v", this_binary+":/sbin/init")
 	}
 	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container, "--")
 	cmd = exec.Command("docker", cmdtxt...)
