@@ -4,10 +4,10 @@ import "testing"
 import "fmt"
 
 func Test_DefaultConfig_1(t *testing.T) {
-	if defaultConfig.ImageName == "ubuntu" {
+	if defaultConfig.ImageName == "busybox" {
 		t.Log("default ImageName passed.")
 	} else {
-		t.Error(fmt.Sprintf("default ImageName failed: expected ubuntu got %s", defaultConfig.ImageName))
+		t.Error(fmt.Sprintf("default ImageName failed: expected busybox got %s", defaultConfig.ImageName))
 	}
 }
 
