@@ -147,7 +147,7 @@ N.B *TODO* Not yet implemented, allowing the global one to blacklist local setti
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
-blacklist_user_config | Array of Strings | An array of configuration keys to disallow in per user dockershrc files | [] | ['container_username', 'mount_home', 'mount_home_to']
+blacklist_user_config | String | A comma seperated list of configuration keys to disallow in per user dockershrc files | "" | container_username,mount_home,mount_home_to
 
 TODO List
 =========

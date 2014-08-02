@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type Configuration struct {
@@ -81,7 +82,9 @@ func loadConfigFromString(bytes []byte, config *Configuration) (err error) {
 				config.Shell = data
 			case "blacklist_user_config":
 				if !config.BlacklistSetup {
-					config.BlacklistUserConfig = append(config.BlacklistUserConfig, data)
+					for _, st := range strings.Split(data, ",") {
+						config.BlacklistUserConfig = append(config.BlacklistUserConfig, st)
+					}
 					config.BlacklistSetup = true
 				}
 			}
