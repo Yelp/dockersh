@@ -25,9 +25,9 @@ type configInterpolation struct {
 	User string
 }
 
-var defaultConfig = Configuration{ImageName: "busybox", MountHomeTo: "%h", ContainerUsername: "%u", Shell: "/bin/ash", MountHome: true, MountTmp: true, BlacklistUserConfig: []string{"image_name","shell","container_username","mount_home_to","mount_tmp"}, BlacklistSetup: false, DisableUserConfig: false}
+var defaultConfig = Configuration{ImageName: "busybox", MountHomeTo: "%h", ContainerUsername: "%u", Shell: "/bin/ash", MountHome: true, MountTmp: true, BlacklistUserConfig: []string{"image_name", "shell", "container_username", "mount_home_to", "mount_tmp"}, BlacklistSetup: false, DisableUserConfig: false}
 
-func loadConfig(filename string, config *Configuration) (err error) {
+func loadConfig(filename string, config *Configuration, limit bool) (err error) {
 	localConfigFile, err := os.Open(filename)
 	if err != nil {
 		err = nil
@@ -38,10 +38,10 @@ func loadConfig(filename string, config *Configuration) (err error) {
 		return
 	}
 	localConfigFile.Close()
-	return (loadConfigFromString(bytes, config))
+	return (loadConfigFromString(bytes, config, limit))
 }
 
-func loadConfigFromString(bytes []byte, config *Configuration) (err error) {
+func loadConfigFromString(bytes []byte, config *Configuration, limit bool) (err error) {
 	var localConfig map[string]interface{}
 	err = json.Unmarshal(bytes, &localConfig)
 	if err != nil {
@@ -55,10 +55,12 @@ func loadConfigFromString(bytes []byte, config *Configuration) (err error) {
 		if !ok {
 			return errors.New("parse")
 		}
-		configAllowed := !config.DisableUserConfig
-		for _, element := range config.BlacklistUserConfig {
-			if k == element {
-				configAllowed = false
+		configAllowed := true
+		if limit {
+			for _, element := range config.BlacklistUserConfig {
+				if k == element {
+					configAllowed = false
+				}
 			}
 		}
 		if configAllowed {
