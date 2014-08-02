@@ -15,9 +15,11 @@ type Configuration struct {
 	Shell               string   `json:"shell"`
 	BlacklistUserConfig []string `json:"blacklist_user_config"`
 	BlacklistSetup      bool
-	DisableUserConfig   bool `json:"disable_user_config"`
-	MountHome           bool `json:"mount_home"`
-	MountTmp            bool `json:"mount_tmp"`
+	DisableUserConfig   bool   `json:"disable_user_config"`
+	MountHome           bool   `json:"mount_home"`
+	MountTmp            bool   `json:"mount_tmp"`
+	MountDockerSocket   bool   `json:"mount_docker_socket"`
+	DockerSocket        string `json:"docker_socket"`
 }
 
 type configInterpolation struct {
@@ -25,7 +27,19 @@ type configInterpolation struct {
 	User string
 }
 
-var defaultConfig = Configuration{ImageName: "busybox", MountHomeTo: "%h", ContainerUsername: "%u", Shell: "/bin/ash", MountHome: true, MountTmp: true, BlacklistUserConfig: []string{"image_name", "shell", "container_username", "mount_home_to", "mount_tmp"}, BlacklistSetup: false, DisableUserConfig: false}
+var defaultConfig = Configuration{
+	ImageName:           "busybox",
+	MountHomeTo:         "%h",
+	ContainerUsername:   "%u",
+	Shell:               "/bin/ash",
+	MountHome:           true,
+	MountTmp:            true,
+	BlacklistUserConfig: []string{"image_name", "shell", "container_username", "mount_home_to", "mount_tmp", "mount_docker_socket"},
+	BlacklistSetup:      false,
+	DisableUserConfig:   false,
+	MountDockerSocket:   false,
+	DockerSocket:        "/var/run/docker.sock",
+}
 
 func loadConfig(filename string, config *Configuration, limit bool) (err error) {
 	localConfigFile, err := os.Open(filename)
@@ -95,6 +109,14 @@ func loadConfigFromString(bytes []byte, config *Configuration, limit bool) (err 
 						config.BlacklistUserConfig = append(config.BlacklistUserConfig, st)
 					}
 					config.BlacklistSetup = true
+				}
+			case "docker_socket":
+				config.DockerSocket = data
+			case "mount_docker_socket":
+				if data == "true" {
+					config.MountDockerSocket = true
+				} else {
+					config.MountDockerSocket = false
 				}
 			}
 		}

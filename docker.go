@@ -29,7 +29,7 @@ func dockerpid(name string) (pid int, err error) {
 	return pid, nil
 }
 
-func dockerstart(username string, homedir string, name string, container string, bindtmp bool, bindhome bool, init string) (pid int, err error) {
+func dockerstart(username string, homedir string, name string, container string, dockersock string, bindtmp bool, bindhome bool, binddocker bool, init string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
@@ -51,6 +51,9 @@ func dockerstart(username string, homedir string, name string, container string,
 	}
 	if bind_self_as_init {
 		cmdtxt = append(cmdtxt, "-v", this_binary+":/sbin/init")
+	}
+	if binddocker {
+		cmdtxt = append(cmdtxt, "-v", dockersock+":/var/run/docker.sock")
 	}
 	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container, "--")
 	cmd = exec.Command("docker", cmdtxt...)
