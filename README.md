@@ -100,11 +100,14 @@ Without docker
 
 You need to install golang (tested on >= 1.3), then you should just be able to run:
 
+    go get
     make
 
 and a 'dockersh' binary will be generated in your $GOPATH (or your current
 working directory if $GOPATH isn't set). N.B. This binary needs to be moved to where
-you would like to install it, and set user + suid
+you would like to install it (recommended /usr/local/bin), and owned by root + u+s
+(suid). This is done automatically if you use the Docker based installed, but
+you need to do it manually if you're compiling the binary yourself.
 
 Invoking dockersh
 =================
@@ -112,7 +115,7 @@ Invoking dockersh
 There are two main methods of invoking dockersh. Either:
 
 1. Put the path to dockersh into /etc/shells, and then change the users shell
-   in /etc/passwd
+   in /etc/passwd (e.g. chsh myuser -s /usr/local/bin/dockersh)
 1. Set dockersh as the ssh ForceCommand in the users $HOME/.ssh/config, or
    globally in /etc/ssh/ssh_config
 
@@ -135,7 +138,6 @@ mount_home_to | String | Where to map the user's home directory inside the conta
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 
-
 /etc/dockershrc.json
 --------------------
 
@@ -151,10 +153,12 @@ TODO List
 =========
 
  * How do we deal with changed settings (i.e. when to recycle the container)
+    * Document just kill 1 inside the container?
+ * Fix up go panics when eixting the root container.
  * More config settings?
  * getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
  * Change config over to be INI style
-    * This would be nicer, as we could also add global per user config
+    * This would be nicer, as we could also add global per user config as [username] type sections
  * Decent test cases
  * Make the darwin nsenter version less crazy - or kill as less features?
  * Allow setting the max memory for the container's processes
@@ -164,9 +168,12 @@ Contributing
 
 Patches are very very welcome!
 
+This is our first real Go project, so we apologise about the shoddy quality of the code.
+
 Please make a branch and send us a pull request.
 
-Please ensure that you use the supplied pre-commit hook to correctly format your code:
+Please ensure that you use the supplied pre-commit hook to correctly format your code
+with go fmt:
 
     ln -s hooks/pre-commit .git/hooks/pre-commit
 

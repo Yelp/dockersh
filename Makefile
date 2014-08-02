@@ -1,8 +1,4 @@
-dockersh: dockersh_nosudo
-	sudo chown root:root dockersh
-	sudo chmod u+s dockersh
- 
-dockersh_nosudo: test
+dockersh: test
 	go fmt && go build
  
 test:
@@ -10,4 +6,5 @@ test:
 
 clean:
 	rm -f dockersh
+	go fmt
 
