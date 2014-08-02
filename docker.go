@@ -53,7 +53,6 @@ func dockerstart(username string, homedir string, name string, container string,
 		cmdtxt = append(cmdtxt, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir))
 	}
 	if bind_self_as_init {
-		fmt.Fprintf(os.Stderr, "This binary is %s\n", this_binary)
 		cmdtxt = append(cmdtxt, "-v", this_binary+":/sbin/init")
 	}
 	if binddocker {
