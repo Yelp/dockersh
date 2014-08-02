@@ -15,6 +15,7 @@ type Configuration struct {
 	Shell               string   `json:"shell"`
 	BlacklistUserConfig []string `json:"blacklist_user_config"`
 	BlacklistSetup      bool
+	DisableUserConfig   bool `json:"disable_user_config"`
 	MountHome           bool `json:"mount_home"`
 	MountTmp            bool `json:"mount_tmp"`
 }
@@ -24,7 +25,7 @@ type configInterpolation struct {
 	User string
 }
 
-var defaultConfig = Configuration{ImageName: "ubuntu", MountHomeTo: "%h", ContainerUsername: "%u", Shell: "%s", MountHome: true, MountTmp: true, BlacklistUserConfig: []string{}, BlacklistSetup: false}
+var defaultConfig = Configuration{ImageName: "busybox", MountHomeTo: "%h", ContainerUsername: "%u", Shell: "/bin/ash", MountHome: true, MountTmp: true, BlacklistUserConfig: []string{"image_name","shell","container_username","mount_home_to","mount_tmp"}, BlacklistSetup: false, DisableUserConfig: false}
 
 func loadConfig(filename string, config *Configuration) (err error) {
 	localConfigFile, err := os.Open(filename)
@@ -46,13 +47,15 @@ func loadConfigFromString(bytes []byte, config *Configuration) (err error) {
 	if err != nil {
 		return
 	}
-
+	if config.DisableUserConfig != false {
+		return nil
+	}
 	for k, v := range localConfig {
 		data, ok := v.(string)
 		if !ok {
 			return errors.New("parse")
 		}
-		configAllowed := true
+		configAllowed := !config.DisableUserConfig
 		for _, element := range config.BlacklistUserConfig {
 			if k == element {
 				configAllowed = false
@@ -77,6 +80,10 @@ func loadConfigFromString(bytes []byte, config *Configuration) (err error) {
 					config.MountHome = true
 				} else {
 					config.MountHome = false
+				}
+			case "disable_user_config":
+				if data == "true" {
+					config.DisableUserConfig = true
 				}
 			case "shell":
 				config.Shell = data

@@ -128,12 +128,12 @@ Local (per user) settings for a specific user's dockersh instance.
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
-image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | %u/mydockersh
+image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
 mount_home | String | If the users home directory should be mounted in the target container | true | false
 mount_tmp | String | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
 mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
-shell | String | The shell that should be started for the user inside the container. | /bin/bash | /bin/ash
+shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 
 
 /etc/dockershrc.json
@@ -142,21 +142,19 @@ shell | String | The shell that should be started for the user inside the contai
 Global settings for all dockersh instances. Allows you to disable settings
 in the per-user ~/.dockersh.json
 
-N.B *TODO* Not yet implemented, allowing the global one to blacklist local settings:
-
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
-blacklist_user_config | String | A comma seperated list of configuration keys to disallow in per user dockershrc files | "" | container_username,mount_home,mount_home_to
+blacklist_user_config | String | A comma seperated list of configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
 
 TODO List
 =========
 
  * How do we deal with changed settings (i.e. when to recycle the container)
- * Finish up config settings
-   * Make binding /tmp a config setting
-   * Fix getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
-   * Add global user config lock out settings
+ * More config settings?
+ * getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
+ * Change config over to be INI style
+    * This would be nicer, as we could also add global per user config
  * Decent test cases
  * Make the darwin nsenter version less crazy - or kill as less features?
 
