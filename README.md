@@ -157,6 +157,7 @@ TODO List
     * This would be nicer, as we could also add global per user config
  * Decent test cases
  * Make the darwin nsenter version less crazy - or kill as less features?
+ * Allow setting the max memory for the container's processes
 
 Contributing
 ============
