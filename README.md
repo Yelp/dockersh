@@ -13,6 +13,7 @@ then spawn a new interactive shell in the container's namespace.
 
 dockersh can be used as a shell in /etc/passwd or as an ssh ForceCommand.
 
+
 This allows you to have a single ssh process, on the normal ssh port, and gives
 a secure way to connect users into their own individual docker
 containers.
@@ -64,7 +65,7 @@ Requirements
 amd64 platforms
 ---------------
 
-Compiles down into a single binary with no external dependencies - see 'Compiling dockersh' below.
+Compiles down into a single binary with no external dependencies - see 'Installation' below.
 
 darwin
 ------
@@ -149,8 +150,8 @@ Setting name  | Type | Description | Default value | Example value
 disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
 blacklist_user_config | String | A comma seperated list of configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
 
-TODO List
-=========
+TODO
+====
 
  * How do we deal with changed settings (i.e. when to recycle the container)
     * Document just kill 1 inside the container?
