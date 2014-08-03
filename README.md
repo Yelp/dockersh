@@ -163,6 +163,11 @@ TODO
  * Decent test cases
  * Make the darwin nsenter version less crazy - or kill as less features?
  * Allow setting the max memory for the container's processes
+ * Allow setting the CMD of the root process
+ * Allow setting the entrypoint of the root process to be something other than "internal"
+ * Find a better way to make ssh agent sockets work than to bind /tmp
+ * Expose ability to mount additional volumes in the config
+ * Expose ability to pass arbitrary options to docker in the config.
 
 Contributing
 ============
