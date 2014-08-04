@@ -1,5 +1,6 @@
 package main
 
+/*
 import "testing"
 import "fmt"
 
@@ -93,3 +94,5 @@ func Test_JsonConfig_4(t *testing.T) {
 		t.Error("blacklisting enabled, value has not changes")
 	}
 }
+
+*/

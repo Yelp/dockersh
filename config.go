@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
+	"code.google.com/p/gcfg"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 type Configuration struct {
@@ -20,6 +20,10 @@ type Configuration struct {
 	MountTmp            bool   `json:"mount_tmp"`
 	MountDockerSocket   bool   `json:"mount_docker_socket"`
 	DockerSocket        string `json:"docker_socket"`
+}
+
+func (c Configuration) Dump() string {
+	return fmt.Sprintf("ImageName %s MountHomeTo %s ContainerUsername %s Shell %s DockerSocket %s", c.ImageName, c.MountHomeTo, c.ContainerUsername, c.Shell, c.DockerSocket)
 }
 
 type configInterpolation struct {
@@ -41,85 +45,51 @@ var defaultConfig = Configuration{
 	DockerSocket:        "/var/run/docker.sock",
 }
 
-func loadConfig(filename string, config *Configuration, limit bool) (err error) {
-	localConfigFile, err := os.Open(filename)
+func loadAllConfig(user string, homedir string) (config Configuration, err error) {
+	globalconfig, err := loadConfig(loadableFile("/etc/dockersh"), user)
 	if err != nil {
-		err = nil
-		return
+		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
+		return config, errors.New("could not load config")
 	}
-	bytes, err := ioutil.ReadAll(localConfigFile)
+	localconfig, err := loadConfig(loadableFile(fmt.Sprintf("%s/.dockersh", homedir)), user)
 	if err != nil {
-		return
+		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
+		return config, errors.New("could not load config")
 	}
-	localConfigFile.Close()
-	return (loadConfigFromString(bytes, config, limit))
+	return mergeConfigs(mergeConfigs(defaultConfig, globalconfig), localconfig), nil
 }
 
-func loadConfigFromString(bytes []byte, config *Configuration, limit bool) (err error) {
-	var localConfig map[string]interface{}
-	err = json.Unmarshal(bytes, &localConfig)
+type loadableFile string
+
+func (fn loadableFile) Getcontents() []byte {
+	localConfigFile, err := os.Open(string(fn))
+	if err != nil {
+	}
+	b, err := ioutil.ReadAll(localConfigFile)
+	localConfigFile.Close()
+	return b
+}
+
+func loadConfig(filename loadableFile, user string) (config Configuration, err error) {
+	bytes := filename.Getcontents()
 	if err != nil {
 		return
 	}
-	if config.DisableUserConfig != false {
-		return nil
+	return (loadConfigFromString(bytes, user))
+}
+
+func mergeConfigs(old Configuration, new Configuration) (ret Configuration) {
+	return old
+}
+
+func loadConfigFromString(bytes []byte, user string) (config Configuration, err error) {
+	inicfg := struct {
+		Dockersh Configuration
+		Profile  map[string]*Configuration
+	}{}
+	err = gcfg.ReadStringInto(&inicfg, string(bytes))
+	if err != nil {
+		return
 	}
-	for k, v := range localConfig {
-		data, ok := v.(string)
-		if !ok {
-			return errors.New("parse")
-		}
-		configAllowed := true
-		if limit {
-			for _, element := range config.BlacklistUserConfig {
-				if k == element {
-					configAllowed = false
-				}
-			}
-		}
-		if configAllowed {
-			switch k {
-			case "image_name":
-				config.ImageName = data
-			case "mount_home_to":
-				config.MountHomeTo = data
-			case "container_username":
-				config.ContainerUsername = data
-			case "mount_tmp":
-				if data == "true" {
-					config.MountTmp = true
-				} else {
-					config.MountTmp = false
-				}
-			case "mount_home":
-				if data == "true" {
-					config.MountHome = true
-				} else {
-					config.MountHome = false
-				}
-			case "disable_user_config":
-				if data == "true" {
-					config.DisableUserConfig = true
-				}
-			case "shell":
-				config.Shell = data
-			case "blacklist_user_config":
-				if !config.BlacklistSetup {
-					for _, st := range strings.Split(data, ",") {
-						config.BlacklistUserConfig = append(config.BlacklistUserConfig, st)
-					}
-					config.BlacklistSetup = true
-				}
-			case "docker_socket":
-				config.DockerSocket = data
-			case "mount_docker_socket":
-				if data == "true" {
-					config.MountDockerSocket = true
-				} else {
-					config.MountDockerSocket = false
-				}
-			}
-		}
-	}
-	return nil
+	return mergeConfigs(inicfg.Dockersh, *inicfg.Profile[user]), nil
 }

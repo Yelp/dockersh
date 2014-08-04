@@ -37,17 +37,7 @@ func realMain() int {
 	}
 	/* Woo! We found nsenter, now to move onto more interesting things */
 	username, homedir, uid, gid, err := getCurrentUser()
-	var config = defaultConfig
-	err = loadConfig("/etc/dockersh.json", &config, false)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-		return 1
-	}
-	err = loadConfig(fmt.Sprintf("%s/.dockersh.json", homedir), &config, true)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-		return 1
-	}
+	config, err := loadAllConfig(username, homedir)
 	configInterpolations := configInterpolation{homedir, username}
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
 	realHomedir := tmplConfigVar(config.MountHomeTo, &configInterpolations)
