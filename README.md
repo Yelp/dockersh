@@ -125,7 +125,13 @@ There are two main methods of invoking dockersh. Either:
 Configuration
 =============
 
-~/.dockersh.json
+We use (https://code.google.com/p/gcfg/)[gocfg] to read configs in an ini style format.
+
+Each file has a [docker] block in it, and zero or more [user "foo"] blocks.
+
+This can be used to enable or disable setting on a per user basis.
+
+~/.dockersh
 ----------------
 
 Local (per user) settings for a specific user's dockersh instance.
@@ -139,16 +145,16 @@ mount_home_to | String | Where to map the user's home directory inside the conta
 container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 
-/etc/dockershrc.json
+/etc/dockershrc
 --------------------
 
 Global settings for all dockersh instances. Allows you to disable settings
-in the per-user ~/.dockersh.json
+in the per-user blocks or ~/.dockersh
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
-blacklist_user_config | String | A comma seperated list of configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
+blacklist_user_config | Multi String | Configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
 
 TODO
 ====
