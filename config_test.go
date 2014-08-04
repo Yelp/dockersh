@@ -57,7 +57,7 @@ containerusername = bill`), "fred")
 }
 
 func Test_JsonConfig_2(t *testing.T) {
-	c := Configuration{BlacklistUserConfig: []string{"container_username"}, ContainerUsername: "default_contun", ImageName: "default"}
+	c := Configuration{BlacklistUserConfig: []string{"containerusername"}, ContainerUsername: "default_contun", ImageName: "default"}
 	n, err := loadConfigFromString([]byte(`[dockersh]
 imagename = testimage
 containerusername = shouldbeblacklisted`), "fred")
@@ -83,8 +83,8 @@ func Test_Config_3(t *testing.T) {
 shell = global_default
 containerusername = global_default
 mounthometo = somewhere
-blacklistuserconfig = container_username
-blacklistuserconfig = mount_home_to`), "fred")
+blacklistuserconfig = containerusername
+blacklistuserconfig = mounthometo`), "fred")
 	if err != nil {
 		t.Error(err)
 	}

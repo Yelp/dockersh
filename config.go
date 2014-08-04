@@ -79,19 +79,26 @@ func loadConfig(filename loadableFile, user string) (config Configuration, err e
 }
 
 func mergeConfigs(old Configuration, new Configuration) (ret Configuration) {
-	if new.Shell != "" {
+	if old.DisableUserConfig {
+		return old
+	}
+	var m = make(map[string]bool)
+	for _, element := range old.BlacklistUserConfig {
+		m[element] = true
+	}
+	if !m["shell"] && new.Shell != "" {
 		old.Shell = new.Shell
 	}
-	if new.ContainerUsername != "" {
+	if !m["containerusername"] && new.ContainerUsername != "" {
 		old.ContainerUsername = new.ContainerUsername
 	}
-	if new.ImageName != "" {
+	if !m["imagename"] && new.ImageName != "" {
 		old.ImageName = new.ImageName
 	}
-	if new.MountHomeTo != "" {
+	if !m["mounthometo"] && new.MountHomeTo != "" {
 		old.MountHomeTo = new.MountHomeTo
 	}
-	if new.DockerSocket != "" {
+	if !m["dockersocket"] && new.DockerSocket != "" {
 		old.DockerSocket = new.DockerSocket
 	}
 	return old
