@@ -131,31 +131,81 @@ Each file has a [docker] block in it, and zero or more [user "foo"] blocks.
 
 This can be used to enable or disable setting on a per user basis.
 
+Each user can (optionally) have a per user config, although this can be disabled.
+
 ~/.dockersh
-----------------
+-----------
 
 Local (per user) settings for a specific user's dockersh instance.
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
-image_name  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
-mount_home | String | If the users home directory should be mounted in the target container | true | false
-mount_tmp | String | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
-mount_home_to | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
-container_username | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
+imagename  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
+mounthome | Bool | If the users home directory should be mounted in the target container | true | false
+mounttmp | String | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
+mounthometo | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
+containerusername | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 
 /etc/dockershrc
---------------------
+---------------
 
 Global settings for all dockersh instances. Allows you to disable settings
 in the per-user blocks or ~/.dockersh
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
-disable_user_config | bool | Set to true to disable ~/.dockersh reading entirely | false | true
-blacklist_user_config | Multi String | Configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
+enableuserconfig | bool | Set to true to enable reading of per user ~/.dockersh files | false | true
+blacklistuserconfig | Multi String | Configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
 
+Example configs
+---------------
+
+Note the liberal use of the blacklistuserconfig
+
+Sets up a fairly restricted shell environment, with one admin user being allowed additional privs, set the following /etc/dockersh 
+
+    [dockersh]
+    imagename = ubuntu:precise
+    shell = /bin/bash
+    mounthome
+
+    [user "someadminguy"]
+    mounttmp
+    mountdockersocket
+    
+In a less restrictive environment, you may allow users to choose their own container and shell, from a 'shell' container
+they have uploaded to the registry, and have ssh agent forwarding working, with the following /etc/dockersh
+
+    [dockersh]
+    imagename = "%u/shell"
+    mounthome
+    mounttmp
+    enableuserconfig
+    blacklistuserconfig = imagename
+    blacklistuserconfig = mounthometo
+    blacklistuserconfig = mountdockersocket
+    blacklistuserconfig = dockersocket
+
+    [user "someadminguy"]
+    mountdockersocket
+
+And an example user's ~/.dockersh
+
+    [dockersh]
+    shell = /bin/zsh
+
+Or just allowing your users to run whatever container they want:
+
+    [dockersh]
+    mounthome
+    mounttmp
+    enableuserconfig
+    blacklistuserconfig = imagename
+    blacklistuserconfig = mounthometo
+    blacklistuserconfig = mountdockersocket
+    blacklistuserconfig = dockersocket
+    
 TODO
 ====
 
