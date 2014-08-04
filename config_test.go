@@ -184,6 +184,3 @@ imagename = testimage
 		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
 	}
 }
-
-
-
