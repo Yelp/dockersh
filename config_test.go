@@ -117,23 +117,73 @@ mounthometo = somewhere_else`), "fred")
 		t.Error("Blacklist mounthome in global config failed")
 	}
 }
-/*
+
 func Test_JsonConfig_4(t *testing.T) {
-	c := Configuration{BlacklistUserConfig: []string{"container_username"}, ContainerUsername: "default_contun", ImageName: "default"}
-	err := loadConfigFromString([]byte(`{"image_name":"testimage","container_username":"shouldbeblacklisted"}`), &c, false)
+	c, err := loadConfigFromString([]byte(`[dockersh]
+blacklistuserconfig = containerusername
+containerusername = default_contun
+imagename = default`), "fred")
+	newc, err := loadConfigFromString([]byte(`[dockersh]
+imagename = testimage
+containerusername = shouldbeblacklisted`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
+	c = mergeConfigs(c, newc)
 	if c.ImageName == "testimage" {
 		t.Log("set ImageName passed.")
 	} else {
 		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
 	}
 	if c.ContainerUsername != "default_contun" {
-		t.Log("blacklising disabled, value changed")
+		t.Error("blacklising disabled, value changed")
 	} else {
-		t.Error("blacklisting enabled, value has not changes")
+		t.Log("blacklisting enabled, value has not changed")
 	}
 }
 
-*/
+func Test_JsonConfig_5(t *testing.T) {
+	c, err := loadConfigFromString([]byte(`[dockersh]
+blacklistuserconfig = containerusername
+blacklistuserconfig = imagename
+containerusername = default_contun
+imagename = default`), "fred")
+	newc, err := loadConfigFromString([]byte(`[dockersh]
+imagename = testimage
+containerusername = shouldbeblacklisted`), "fred")
+	if err != nil {
+		t.Error(err)
+	}
+	c = mergeConfigs(c, newc)
+	if c.ImageName == "default" {
+		t.Log("set ImageName passed.")
+	} else {
+		t.Error(fmt.Sprintf("Expected ImageName default got %s", c.ImageName))
+	}
+	if c.ContainerUsername != "default_contun" {
+		t.Error("blacklising disabled, value changed")
+	} else {
+		t.Log("blacklisting enabled, value has not changed")
+	}
+}
+
+func Test_JsonConfig_6(t *testing.T) {
+	c, err := loadConfigFromString([]byte(`[dockersh]
+blacklistuserconfig = imagename
+imagename = default
+
+[user "fred"]
+imagename = testimage
+containerusername = shouldbeblacklisted`), "fred")
+	if err != nil {
+		t.Error(err)
+	}
+	if c.ImageName == "default" {
+		t.Log("set ImageName passed.")
+	} else {
+		t.Error(fmt.Sprintf("Expected ImageName default got %s", c.ImageName))
+	}
+}
+
+
+
