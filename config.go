@@ -91,5 +91,8 @@ func loadConfigFromString(bytes []byte, user string) (config Configuration, err 
 	if err != nil {
 		return
 	}
+	if inicfg.Profile[user] == nil {
+		return inicfg.Dockersh, nil
+	}
 	return mergeConfigs(inicfg.Dockersh, *inicfg.Profile[user]), nil
 }
