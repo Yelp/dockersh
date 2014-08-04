@@ -61,7 +61,7 @@ func Test_IniConfig_2(t *testing.T) {
 	n, err := loadConfigFromString([]byte(`[dockersh]
 imagename = testimage
 containerusername = shouldbeblacklisted`), "fred")
-	c = mergeConfigs(c, n)
+	c = mergeConfigs(c, n, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -104,7 +104,7 @@ mounthometo = somewhere_else`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
-	c = mergeConfigs(c, newc)
+	c = mergeConfigs(c, newc, true)
 	if c.Shell != "user_value" {
 		t.Error("Local defaults not applying over global defaults")
 	} else {
@@ -129,7 +129,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
-	c = mergeConfigs(c, newc)
+	c = mergeConfigs(c, newc, true)
 	if c.ImageName == "testimage" {
 		t.Log("set ImageName passed.")
 	} else {
@@ -154,7 +154,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
-	c = mergeConfigs(c, newc)
+	c = mergeConfigs(c, newc, true)
 	if c.ImageName == "default" {
 		t.Log("set ImageName passed.")
 	} else {
@@ -174,14 +174,14 @@ imagename = default
 
 [user "fred"]
 imagename = testimage
-containerusername = shouldbeblacklisted`), "fred")
+`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
-	if c.ImageName == "default" {
-		t.Log("set ImageName passed.")
+	if c.ImageName == "testimage" {
+		t.Log("set ImageName in user section when blacklisted in [dockersh] passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName default got %s", c.ImageName))
+		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
 	}
 }
 

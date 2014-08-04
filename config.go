@@ -56,7 +56,7 @@ func loadAllConfig(user string, homedir string) (config Configuration, err error
 		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return config, errors.New("could not load config")
 	}
-	return mergeConfigs(mergeConfigs(defaultConfig, globalconfig), localconfig), nil
+	return mergeConfigs(mergeConfigs(defaultConfig, globalconfig, false), localconfig, true), nil
 }
 
 type loadableFile string
@@ -78,27 +78,27 @@ func loadConfig(filename loadableFile, user string) (config Configuration, err e
 	return (loadConfigFromString(bytes, user))
 }
 
-func mergeConfigs(old Configuration, new Configuration) (ret Configuration) {
-	if old.DisableUserConfig {
+func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Configuration) {
+	if blacklist && old.DisableUserConfig {
 		return old
 	}
 	var m = make(map[string]bool)
 	for _, element := range old.BlacklistUserConfig {
 		m[element] = true
 	}
-	if !m["shell"] && new.Shell != "" {
+	if (!blacklist || !m["shell"]) && new.Shell != "" {
 		old.Shell = new.Shell
 	}
-	if !m["containerusername"] && new.ContainerUsername != "" {
+	if (!blacklist || !m["containerusername"]) && new.ContainerUsername != "" {
 		old.ContainerUsername = new.ContainerUsername
 	}
-	if !m["imagename"] && new.ImageName != "" {
+	if (!blacklist || !m["imagename"]) && new.ImageName != "" {
 		old.ImageName = new.ImageName
 	}
-	if !m["mounthometo"] && new.MountHomeTo != "" {
+	if (!blacklist || !m["mounthometo"]) && new.MountHomeTo != "" {
 		old.MountHomeTo = new.MountHomeTo
 	}
-	if !m["dockersocket"] && new.DockerSocket != "" {
+	if (!blacklist || !m["dockersocket"]) && new.DockerSocket != "" {
 		old.DockerSocket = new.DockerSocket
 	}
 	return old
@@ -116,5 +116,5 @@ func loadConfigFromString(bytes []byte, user string) (config Configuration, err 
 	if inicfg.User[user] == nil {
 		return inicfg.Dockersh, nil
 	}
-	return mergeConfigs(inicfg.Dockersh, *inicfg.User[user]), nil
+	return mergeConfigs(inicfg.Dockersh, *inicfg.User[user], false), nil
 }
