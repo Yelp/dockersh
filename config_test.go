@@ -56,7 +56,7 @@ containerusername = bill`), "fred")
 	}
 }
 
-func Test_JsonConfig_2(t *testing.T) {
+func Test_IniConfig_2(t *testing.T) {
 	c := Configuration{BlacklistUserConfig: []string{"containerusername"}, ContainerUsername: "default_contun", ImageName: "default"}
 	n, err := loadConfigFromString([]byte(`[dockersh]
 imagename = testimage
@@ -118,7 +118,7 @@ mounthometo = somewhere_else`), "fred")
 	}
 }
 
-func Test_JsonConfig_4(t *testing.T) {
+func Test_IniConfig_4(t *testing.T) {
 	c, err := loadConfigFromString([]byte(`[dockersh]
 blacklistuserconfig = containerusername
 containerusername = default_contun
@@ -142,7 +142,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	}
 }
 
-func Test_JsonConfig_5(t *testing.T) {
+func Test_IniConfig_5(t *testing.T) {
 	c, err := loadConfigFromString([]byte(`[dockersh]
 blacklistuserconfig = containerusername
 blacklistuserconfig = imagename
@@ -167,7 +167,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	}
 }
 
-func Test_JsonConfig_6(t *testing.T) {
+func Test_IniConfig_6(t *testing.T) {
 	c, err := loadConfigFromString([]byte(`[dockersh]
 blacklistuserconfig = imagename
 imagename = default
