@@ -79,20 +79,35 @@ func loadConfig(filename loadableFile, user string) (config Configuration, err e
 }
 
 func mergeConfigs(old Configuration, new Configuration) (ret Configuration) {
+	if new.Shell != "" {
+		old.Shell = new.Shell
+	}
+	if new.ContainerUsername != "" {
+		old.ContainerUsername = new.ContainerUsername
+	}
+	if new.ImageName != "" {
+		old.ImageName = new.ImageName
+	}
+	if new.MountHomeTo != "" {
+		old.MountHomeTo = new.MountHomeTo
+	}
+	if new.DockerSocket != "" {
+		old.DockerSocket = new.DockerSocket
+	}
 	return old
 }
 
 func loadConfigFromString(bytes []byte, user string) (config Configuration, err error) {
 	inicfg := struct {
 		Dockersh Configuration
-		Profile  map[string]*Configuration
+		User     map[string]*Configuration
 	}{}
 	err = gcfg.ReadStringInto(&inicfg, string(bytes))
 	if err != nil {
 		return
 	}
-	if inicfg.Profile[user] == nil {
+	if inicfg.User[user] == nil {
 		return inicfg.Dockersh, nil
 	}
-	return mergeConfigs(inicfg.Dockersh, *inicfg.Profile[user]), nil
+	return mergeConfigs(inicfg.Dockersh, *inicfg.User[user]), nil
 }

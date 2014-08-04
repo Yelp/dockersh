@@ -1,6 +1,5 @@
 package main
 
-/*
 import "testing"
 import "fmt"
 
@@ -12,13 +11,13 @@ func Test_DefaultConfig_1(t *testing.T) {
 	}
 }
 
-func Test_JsonConfig_1(t *testing.T) {
-	c := Configuration{}
-	err := loadConfigFromString([]byte(`{}`), &c, true)
+func Test_SimpleConfig_1(t *testing.T) {
+	c, err := loadConfigFromString([]byte(``), "fred")
 	if err != nil {
 		t.Error(err)
 	}
-	err = loadConfigFromString([]byte(`{"image_name":"testimage"}`), &c, true)
+	c, err = loadConfigFromString([]byte(`[dockersh]
+imagename = testimage`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
@@ -29,6 +28,35 @@ func Test_JsonConfig_1(t *testing.T) {
 	}
 }
 
+func Test_UserConfig_1(t *testing.T) {
+	c, err := loadConfigFromString([]byte(`[dockersh]
+imagename = testimage
+shell = someshell
+
+[user "fred"]
+imagename = fredsimage
+containerusername = bill`), "fred")
+	if err != nil {
+		t.Error(err)
+	}
+	if c.Shell == "someshell" {
+		t.Log("set Shell in dockersh config passed.")
+	} else {
+		t.Error(fmt.Sprintf("Expected Shell dockersg got %s", c.Shell))
+	}
+	if c.ContainerUsername == "bill" {
+		t.Log("set ContainerUserName in user config passed.")
+	} else {
+		t.Error(fmt.Sprintf("Expected ContainerUserName bill got %s", c.ContainerUsername))
+	}
+	if c.ImageName == "fredsimage" {
+		t.Log("set ImageName in user config passed.")
+	} else {
+		t.Error(fmt.Sprintf("Expected ImageName fredsimage got %s", c.ImageName))
+	}
+}
+
+/*
 func Test_JsonConfig_2(t *testing.T) {
 	c := Configuration{BlacklistUserConfig: []string{"container_username"}, ContainerUsername: "default_contun", ImageName: "default"}
 	err := loadConfigFromString([]byte(`{"image_name":"testimage","container_username":"shouldbeblacklisted"}`), &c, true)
