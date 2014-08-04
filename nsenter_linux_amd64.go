@@ -32,10 +32,10 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		panic("Could not open fd to cwd")
 	}
 
-	if !string.HasPrefix(shell, "/") {
-		panic(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
-	}
-	shell = path.Clean(shell)
+	//if !string.HasPrefix(shell, "/") {
+	//	panic(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
+	//}
+	//shell = path.Clean(shell)
 	/*_, shellerr := os.Open(fmt.Sprintf("/proc/%s/root%s", shell))
 	if shellerr != nil {
 		panic(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
