@@ -35,7 +35,7 @@ func dockerstart(username string, homedir string, name string, container string,
 
 	bind_self_as_init := false
 	if init == "internal" {
-		init = "/sbin/init"
+		init = "/init"
 		bind_self_as_init = true
 	}
 	this_binary := "/usr/local/bin/dockersh"
@@ -52,12 +52,13 @@ func dockerstart(username string, homedir string, name string, container string,
 		cmdtxt = append(cmdtxt, "-v", fmt.Sprintf("%s:%s:rw", homedir, homedir))
 	}
 	if bind_self_as_init {
-		cmdtxt = append(cmdtxt, "-v", this_binary+":/sbin/init")
+		cmdtxt = append(cmdtxt, "-v", this_binary+":/init")
 	}
 	if binddocker {
 		cmdtxt = append(cmdtxt, "-v", dockersock+":/var/run/docker.sock")
 	}
 	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container, "--")
+	fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
 	cmd = exec.Command("docker", cmdtxt...)
 	var output bytes.Buffer
 	cmd.Stdout = &output

@@ -10,7 +10,7 @@ import (
 
 func main() {
 	fmt.Fprintf(os.Stdout, "starting dockersh root process\n")
-	if os.Args[0] == "/sbin/init" {
+	if os.Args[0] == "/init" {
 		// Wait for terminating signal
 		sc := make(chan os.Signal, 2)
 		signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
