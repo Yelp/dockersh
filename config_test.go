@@ -56,10 +56,12 @@ containerusername = bill`), "fred")
 	}
 }
 
-/*
 func Test_JsonConfig_2(t *testing.T) {
 	c := Configuration{BlacklistUserConfig: []string{"container_username"}, ContainerUsername: "default_contun", ImageName: "default"}
-	err := loadConfigFromString([]byte(`{"image_name":"testimage","container_username":"shouldbeblacklisted"}`), &c, true)
+	n, err := loadConfigFromString([]byte(`[dockersh]
+imagename = testimage
+containerusername = shouldbeblacklisted`), "fred")
+	c = mergeConfigs(c, n)
 	if err != nil {
 		t.Error(err)
 	}
@@ -75,9 +77,14 @@ func Test_JsonConfig_2(t *testing.T) {
 	}
 }
 
-func Test_JsonConfig_3(t *testing.T) {
+func Test_Config_3(t *testing.T) {
 	c := Configuration{BlacklistUserConfig: []string{}, ContainerUsername: "default_contun", Shell: "default_shell"}
-	err := loadConfigFromString([]byte(`{"shell":"global_default","container_username":"global_default","mount_home_to":"somewhere","blacklist_user_config":"container_username,mount_home_to"}`), &c, true)
+	c, err := loadConfigFromString([]byte(`[dockersh]
+shell = global_default
+containerusername = global_default
+mounthometo = somewhere
+blacklistuserconfig = container_username
+blacklistuserconfig = mount_home_to`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
@@ -90,12 +97,18 @@ func Test_JsonConfig_3(t *testing.T) {
 	if c.MountHomeTo != "somewhere" {
 		t.Error("Set mounthome to global default failed")
 	}
-	err = loadConfigFromString([]byte(`{"shell":"user_value","container_username":"user_value","mount_home":"somewhere_else"}`), &c, true)
+	newc, err := loadConfigFromString([]byte(`[dockersh]
+shell = user_value
+containerusername = user_value
+mounthometo = somewhere_else`), "fred")
 	if err != nil {
 		t.Error(err)
 	}
+	c = mergeConfigs(c, newc)
 	if c.Shell != "user_value" {
 		t.Error("Local defaults not applying over global defaults")
+	} else {
+		t.Log("c.shell not overridden")
 	}
 	if c.ContainerUsername != "global_default" {
 		t.Error("Blacklist of container_username in global config failed")
@@ -104,7 +117,7 @@ func Test_JsonConfig_3(t *testing.T) {
 		t.Error("Blacklist mounthome in global config failed")
 	}
 }
-
+/*
 func Test_JsonConfig_4(t *testing.T) {
 	c := Configuration{BlacklistUserConfig: []string{"container_username"}, ContainerUsername: "default_contun", ImageName: "default"}
 	err := loadConfigFromString([]byte(`{"image_name":"testimage","container_username":"shouldbeblacklisted"}`), &c, false)
