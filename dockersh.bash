@@ -36,5 +36,6 @@ if [ -z "$PID" ] || [ "$PID" == 0 ]; then
     PID=$(docker inspect --format {{.State.Pid}} "$DOCKER_NAME")
 fi
 
+# N.B. You need to bobtfish/nsenter version of nsenter for suid/sgid to do the right thing.
 sudo nsenter --target "$PID" --mount --uts --ipc --net --pid --setuid $DESIRED_UID --setgid $DESIRED_GID --wd=$HOMEDIR -- "$REAL_SHELL"
 
