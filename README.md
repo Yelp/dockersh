@@ -125,7 +125,7 @@ There are two main methods of invoking dockersh. Either:
 Configuration
 =============
 
-We use (https://code.google.com/p/gcfg/)[gocfg] to read configs in an ini style format.
+We use [gcfg](https://code.google.com/p/gcfg/) to read configs in an ini style format.
 
 Each file has a [docker] block in it, and zero or more [user "foo"] blocks.
 
