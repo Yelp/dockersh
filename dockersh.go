@@ -54,6 +54,7 @@ func realMain() int {
 			return 1
 		}
 	}
-	nsenterexec(pid, uid, gid, realHomedir, realShell)
+    // FIXME - Should this be it's own setting not realHomedirTo
+	nsenterexec(pid, uid, gid, realHomedirTo, realShell)
 	return 0
 }
