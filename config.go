@@ -9,17 +9,23 @@ import (
 )
 
 type Configuration struct {
-	ImageName           string
-	MountHomeTo         string
-	ContainerUsername   string
-	Shell               string
-	BlacklistUserConfig []string
-	BlacklistSetup      bool
-	EnableUserConfig    bool
-	MountHome           bool
-	MountTmp            bool
-	MountDockerSocket   bool
-	DockerSocket        string
+	ImageName                   string
+	EnableUserImageName         bool
+	MountHomeTo                 string
+	EnableUserMountHomeTo       bool
+	ContainerUsername           string
+	EnableUserContainerUsername bool
+	Shell                       string
+	EnableUserShell             bool
+	EnableUserConfig            bool
+	MountHome                   bool
+	EnableUserMountHome 	    bool
+	MountTmp                    bool
+	EnableUserMountTmp	    bool
+	MountDockerSocket           bool
+	EnableUserMountDockerSocket bool
+	DockerSocket                string
+	EnableUserDockerSocket	    bool
 }
 
 func (c Configuration) Dump() string {
@@ -38,8 +44,6 @@ var defaultConfig = Configuration{
 	Shell:               "/bin/ash",
 	MountHome:           true,
 	MountTmp:            true,
-	BlacklistUserConfig: []string{"imagename", "shell", "containerusername", "mounthometo", "mounttmp", "mountdockersocket"},
-	BlacklistSetup:      false,
 	EnableUserConfig:    false,
 	MountDockerSocket:   false,
 	DockerSocket:        "/var/run/docker.sock",
@@ -85,9 +89,9 @@ func loadConfig(filename loadableFile, user string) (config Configuration, err e
 
 func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Configuration) {
 	var m = make(map[string]bool)
-	for _, element := range old.BlacklistUserConfig {
+	/*for _, element := range old.BlacklistUserConfig {
 		m[element] = true
-	}
+	}*/
 	if (!blacklist || !m["shell"]) && new.Shell != "" {
 		old.Shell = new.Shell
 	}
