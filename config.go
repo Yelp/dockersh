@@ -103,7 +103,7 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 		old.MountHomeTo = new.MountHomeTo
 	}
     if (!blacklist || old.EnableUserMountHomeFrom) && new.MountHomeFrom != "" {
-        old.MountHomeTo = new.MountHomeFrom
+        old.MountHomeFrom = new.MountHomeFrom
     }
 	if (!blacklist || old.EnableUserDockerSocket) && new.DockerSocket != "" {
 		old.DockerSocket = new.DockerSocket
