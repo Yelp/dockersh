@@ -42,10 +42,6 @@ var defaultConfig = Configuration{
 	MountHomeTo:         "%h",
 	ContainerUsername:   "%u",
 	Shell:               "/bin/ash",
-	MountHome:           true,
-	MountTmp:            true,
-	EnableUserConfig:    false,
-	MountDockerSocket:   false,
 	DockerSocket:        "/var/run/docker.sock",
 }
 
@@ -89,25 +85,31 @@ func loadConfig(filename loadableFile, user string) (config Configuration, err e
 
 func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Configuration) {
 	var m = make(map[string]bool)
-	/*for _, element := range old.BlacklistUserConfig {
-		m[element] = true
-	}*/
-	if (!blacklist || !m["shell"]) && new.Shell != "" {
+	if (!blacklist || old.EnableUserShell) && new.Shell != "" {
 		old.Shell = new.Shell
 	}
-	if (!blacklist || !m["containerusername"]) && new.ContainerUsername != "" {
+	if (!blacklist || old.EnableUserContainerUsername) && new.ContainerUsername != "" {
 		old.ContainerUsername = new.ContainerUsername
 	}
-	if (!blacklist || !m["imagename"]) && new.ImageName != "" {
+	if (!blacklist || old.EnableUserImageName) && new.ImageName != "" {
 		old.ImageName = new.ImageName
 	}
-	if (!blacklist || !m["mounthometo"]) && new.MountHomeTo != "" {
+	if (!blacklist || old.EnableUserMountHomeTo) && new.MountHomeTo != "" {
 		old.MountHomeTo = new.MountHomeTo
 	}
-	if (!blacklist || !m["dockersocket"]) && new.DockerSocket != "" {
+	if (!blacklist || old.EnableUserDockerSocket) && new.DockerSocket != "" {
 		old.DockerSocket = new.DockerSocket
 	}
-	if new.EnableUserConfig == true {
+	if (!blacklist || old.EnableUserMountHome) && new.MountHome == true {
+		old.MountHome = true
+	}
+	if (!blacklist || old.EnableUserMountTmp) && new.MountTmp == true {
+		old.MountTmp = true
+	}
+	if (!blacklist || old.EnableUserMountDockerSocket) && new.MountDockerSocket == true {
+		old.MountDockerSocket = true
+	}
+	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
 	}
 	return old
