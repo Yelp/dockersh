@@ -138,6 +138,8 @@ Each user can (optionally) have a per user config, although this can be disabled
 
 Local (per user) settings for a specific user's dockersh instance.
 
+Settings should be contained prefixed with a [docker] block
+
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 imagename  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
@@ -146,17 +148,24 @@ mounttmp | String | If /tmp should be mounted into the target container (so that
 mounthometo | String | Where to map the user's home directory inside the container. Empty means don't mount home. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 containerusername | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
+mountdockersocket | Bool | If to mount the docker socket from the host. (DANGEROUS) | false | true
+dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
 
 /etc/dockershrc
 ---------------
 
-Global settings for all dockersh instances. Allows you to disable settings
-in the per-user blocks or ~/.dockersh
+Global settings for all dockersh instances. Allows you to set settings for all users (in a [docker block])
+or specific users (in a [user "username"] block), on enable setting settings in per user  ~/.dockersh
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 enableuserconfig | bool | Set to true to enable reading of per user ~/.dockersh files | false | true
-blacklistuserconfig | Multi String | Configuration keys to disallow in per user dockershrc files | image_name,shell,container_username,mount_home_to,mount_tmp | container_username,mount_home,mount_home_to
+enableuserimagename | bool | Set to true to enable reading of imagename parameter from ~/.dockersh files | false | true
+enableusermounthome | bool | Set to true to enable reading of mounthome parameter from ~/.dockersh files | false | true
+enableusermounttmp | bool | Set to true to enable reading of mounttmp parameter from ~/.dockersh files | false | true
+enableusermounthometo | bool | Set to true to enable reading of mounthometo parameter from ~/.dockersh files | false | true
+enableusercontainerusername | bool | Set to true to enable reading of containerusername parameter from ~/.dockersh files | false | true
+enableusershell | bool | Set to true to enable reading of shell parameter from ~/.dockersh files | false | true
 
 Example configs
 ---------------
