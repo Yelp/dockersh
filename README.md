@@ -8,10 +8,10 @@ What is this?
 
 dockersh is designed to be used as a login shell on machines with multiple interactive users.
 
-When a user invokes dockersh, it will bring up a Docker container (if not already running), and
+When a user invokes dockersh, it will bring up a [Docker](https://docker.com/) container (if not already running), and
 then spawn a new interactive shell in the container's namespace.
 
-dockersh can be used as a shell in /etc/passwd or as an ssh ForceCommand.
+dockersh can be used as a shell in ``/etc/passwd`` or as an ssh ``ForceCommand``.
 
 
 This allows you to have a single ssh process, on the normal ssh port, and gives
@@ -36,7 +36,7 @@ container, and either have have a different port for each user to ssh to or some
 Forcecommand hacks (which only work with agent forwarding from the client).
 
 Dockersh eliminates the need for any of these techiques by acting like a regular
-shell which can be used in /etc/passwd or as an ssh ForceCommand.  
+shell which can be used in /etc/passwd or as an ssh [ForceCommand](http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/sshd_config.5?query=sshd_config).  
 This allows you to have a single ssh process, on the normal ssh port, and gives
 a (hopefully) secure way to connect users into their own individual docker
 containers.
@@ -70,8 +70,8 @@ Compiles down into a single binary with no external dependencies - see 'Installa
 darwin
 ------
 
-dockersh tries to support Mac environments e.g. boot2docker (however at this time the solution is less
-optimum).
+dockersh tries to support Mac environments e.g. [boot2docker](http://boot2docker.io/) (however at this time the solution is less
+optimum and less secure).
 
 dockersh requires a patched version of the 'nsenter' utility on the target machine *if* you want to
 use it from darwin (E.g. in boot2docker). This version of nsenter needs to be installed inside the
@@ -105,8 +105,8 @@ You need to install golang (tested on >= 1.3), then you should just be able to r
     make
 
 and a 'dockersh' binary will be generated in your $GOPATH (or your current
-working directory if $GOPATH isn't set). N.B. This binary needs to be moved to where
-you would like to install it (recommended /usr/local/bin), and owned by root + u+s
+working directory if ``$GOPATH`` isn't set). N.B. This binary needs to be moved to where
+you would like to install it (recommended ``/usr/local/bin``), and owned by root + u+s
 (suid). This is done automatically if you use the Docker based installed, but
 you need to do it manually if you're compiling the binary yourself.
 
@@ -115,10 +115,10 @@ Invoking dockersh
 
 There are two main methods of invoking dockersh. Either:
 
-1. Put the path to dockersh into /etc/shells, and then change the users shell
-   in /etc/passwd (e.g. chsh myuser -s /usr/local/bin/dockersh)
-1. Set dockersh as the ssh ForceCommand in the users $HOME/.ssh/config, or
-   globally in /etc/ssh/ssh_config
+1. Put the path to dockersh into ``/etc/shells``, and then change the users shell
+   in /etc/passwd (e.g. ``chsh myuser -s /usr/local/bin/dockersh``)
+1. Set dockersh as the ssh ``ForceCommand`` in the users ``$HOME/.ssh/config``, or
+   globally in ``/etc/ssh/ssh_config``
 
 *Note:* The dockersh binary needs the suid bit set to operate!
 
@@ -127,7 +127,7 @@ Configuration
 
 We use [gcfg](https://code.google.com/p/gcfg/) to read configs in an ini style format.
 
-Each file has a [docker] block in it, and zero or more [user "foo"] blocks.
+Each file has a ``[docker]`` block in it, and zero or more ``[user "foo"]`` blocks.
 
 This can be used to enable or disable setting on a per user basis.
 
@@ -138,7 +138,7 @@ Each user can (optionally) have a per user config, although this can be disabled
 
 Local (per user) settings for a specific user's dockersh instance.
 
-Settings should be contained prefixed with a [docker] block
+Settings should be contained prefixed with a ``[docker]`` block
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
@@ -156,8 +156,8 @@ entrypoint | String | The entrypoint for the persistent process to keep the cont
 /etc/dockershrc
 ---------------
 
-Global settings for all dockersh instances. Allows you to set settings for all users (in a [docker block])
-or specific users (in a [user "username"] block), on enable setting settings in per user  ~/.dockersh
+Global settings for all dockersh instances. Allows you to set settings for all users (in a ``[docker block]``)
+or specific users (in a ``[user "username"]`` block), on enable setting settings in per user  ~/.dockersh
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
@@ -195,10 +195,7 @@ they have uploaded to the registry, and have ssh agent forwarding working, with 
     mounthome
     mounttmp
     enableuserconfig
-    blacklistuserconfig = imagename
-    blacklistuserconfig = mounthometo
-    blacklistuserconfig = mountdockersocket
-    blacklistuserconfig = dockersocket
+    enableshell
 
     [user "someadminguy"]
     mountdockersocket
@@ -214,17 +211,14 @@ Or just allowing your users to run whatever container they want:
     mounthome
     mounttmp
     enableuserconfig
-    blacklistuserconfig = imagename
-    blacklistuserconfig = mounthometo
-    blacklistuserconfig = mountdockersocket
-    blacklistuserconfig = dockersocket
-    
+    enableuserimagename
+
 TODO
 ====
 
  * How do we deal with changed settings (i.e. when to recycle the container)
     * Document just kill 1 inside the container?
- * Fix up go panics when eixting the root container.
+ * Fix up go panics when exiting the root container.
  * More config settings?
  * getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
  * Change config over to be INI style
