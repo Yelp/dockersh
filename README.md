@@ -221,8 +221,6 @@ TODO
  * Fix up go panics when exiting the root container.
  * More config settings?
  * getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
- * Change config over to be INI style
-    * This would be nicer, as we could also add global per user config as [username] type sections
  * Decent test cases
  * Make the darwin nsenter version less crazy - or kill as less features?
  * Allow setting the max memory for the container's processes
