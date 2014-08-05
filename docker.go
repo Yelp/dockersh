@@ -58,7 +58,7 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 		cmdtxt = append(cmdtxt, "-v", dockersock+":/var/run/docker.sock")
 	}
 	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container, "--")
-	fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
+	//fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
 	cmd = exec.Command("docker", cmdtxt...)
 	var output bytes.Buffer
 	cmd.Stdout = &output
