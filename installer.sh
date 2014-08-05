@@ -11,6 +11,7 @@ echo ""
 if [ -d "/target" ];then
   echo "GOING TO DO INSTALL IN 5 SECONDS, Ctrl-C to abort"
   sleep 5
+  rm -f /target/dockersh
   cp -a /gopath/src/dockersh/dockersh /target/dockersh
 else
   echo "No /target directory found, not installing"
