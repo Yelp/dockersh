@@ -57,7 +57,7 @@ containerusername = bill`), "fred")
 }
 
 func Test_IniConfig_2(t *testing.T) {
-	c := Configuration{BlacklistUserConfig: []string{"containerusername"}, ContainerUsername: "default_contun", ImageName: "default"}
+	c := Configuration{ContainerUsername: "default_contun", ImageName: "default"}
 	n, err := loadConfigFromString([]byte(`[dockersh]
 imagename = testimage
 containerusername = shouldbeblacklisted`), "fred")
@@ -78,7 +78,7 @@ containerusername = shouldbeblacklisted`), "fred")
 }
 
 func Test_Config_3(t *testing.T) {
-	c := Configuration{BlacklistUserConfig: []string{}, ContainerUsername: "default_contun", Shell: "default_shell"}
+	c := Configuration{ContainerUsername: "default_contun", Shell: "default_shell"}
 	c, err := loadConfigFromString([]byte(`[dockersh]
 shell = global_default
 containerusername = global_default
