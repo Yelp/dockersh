@@ -40,14 +40,15 @@ func realMain() int {
 	config, err := loadAllConfig(username, homedir)
 	configInterpolations := configInterpolation{homedir, username}
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
-	realHomedir := tmplConfigVar(config.MountHomeTo, &configInterpolations)
+	realHomedirTo := tmplConfigVar(config.MountHomeTo, &configInterpolations)
+    realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
 	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
 	realShell := tmplConfigVar(config.Shell, &configInterpolations)
 	containerName := fmt.Sprintf("%s_dockersh", realUsername)
 
 	pid, err := dockerpid(containerName)
 	if err != nil {
-		pid, err = dockerstart(realUsername, realHomedir, containerName, realImageName, config.DockerSocket, config.MountHome, config.MountTmp, config.MountDockerSocket, config.Entrypoint)
+		pid, err = dockerstart(realUsername, realHomedirFrom, realHomedirTo, containerName, realImageName, config.DockerSocket, config.MountHome, config.MountTmp, config.MountDockerSocket, config.Entrypoint)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
