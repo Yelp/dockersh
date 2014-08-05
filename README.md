@@ -150,6 +150,7 @@ containerusername | String | Username which should be used inside the container.
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 mountdockersocket | Bool | If to mount the docker socket from the host. (DANGEROUS) | false | true
 dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
+entrypoint | String | The entrypoint for the persistent process to keep the container running | internal | /sbin/yoursupervisor
 
 /etc/dockershrc
 ---------------
@@ -166,6 +167,7 @@ enableusermounttmp | bool | Set to true to enable reading of mounttmp parameter 
 enableusermounthometo | bool | Set to true to enable reading of mounthometo parameter from ~/.dockersh files | false | true
 enableusercontainerusername | bool | Set to true to enable reading of containerusername parameter from ~/.dockersh files | false | true
 enableusershell | bool | Set to true to enable reading of shell parameter from ~/.dockersh files | false | true
+enableuserentrypoint | bool | Set to true to enable users to set their own supervisor daemon / entry point to the container for PID 1 | false | true
 
 Example configs
 ---------------

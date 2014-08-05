@@ -26,6 +26,8 @@ type Configuration struct {
 	EnableUserMountDockerSocket bool
 	DockerSocket                string
 	EnableUserDockerSocket	    bool
+	Entrypoint                  string
+	EnableUserEntrypoint        bool
 }
 
 func (c Configuration) Dump() string {
@@ -43,6 +45,7 @@ var defaultConfig = Configuration{
 	ContainerUsername:   "%u",
 	Shell:               "/bin/ash",
 	DockerSocket:        "/var/run/docker.sock",
+	Entrypoint:	     "internal",
 }
 
 func loadAllConfig(user string, homedir string) (config Configuration, err error) {
@@ -109,7 +112,10 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	if (!blacklist || old.EnableUserMountDockerSocket) && new.MountDockerSocket == true {
 		old.MountDockerSocket = true
 	}
-	if !blacklist && new.EnableUserConfig == true {
+	if (!blacklist || old.EnableUserEntrypoint) && new.Entrypoint != "" {
+		old.Entrypoint = new.Entrypoint
+	}
+        if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
 	}
 	return old
