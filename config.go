@@ -87,7 +87,6 @@ func loadConfig(filename loadableFile, user string) (config Configuration, err e
 }
 
 func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Configuration) {
-	var m = make(map[string]bool)
 	if (!blacklist || old.EnableUserShell) && new.Shell != "" {
 		old.Shell = new.Shell
 	}
