@@ -54,10 +54,9 @@ func realMain() int {
 			return 1
 		}
 	}
-	// FIXME - Should this be it's own setting not realHomedirTo
 	err = nsenterexec(pid, uid, gid, realHomedirTo, realShell)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "ERROR")
 		return 1
 	}
 	return 0
