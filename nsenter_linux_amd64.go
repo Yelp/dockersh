@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"syscall"
 )
 
@@ -33,10 +34,9 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	if cwderr != nil {
 		panic("Could not open fd to cwd")
 	}
-
-	//if string != "/" {
-	//	panic(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
-	//}
+	if strings.HasPrefix(shell, "/") != true {
+		return errors.New(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
+	}
 	shell = path.Clean(shell)
 	_, shellerr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), shell))
 	if shellerr != nil {
