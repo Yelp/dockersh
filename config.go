@@ -11,8 +11,8 @@ import (
 type Configuration struct {
 	ImageName                   string
 	EnableUserImageName         bool
-    MountHomeFrom               string
-    EnableUserMountHomeFrom     bool
+	MountHomeFrom               string
+	EnableUserMountHomeFrom     bool
 	MountHomeTo                 string
 	EnableUserMountHomeTo       bool
 	ContainerUsername           string
@@ -21,13 +21,13 @@ type Configuration struct {
 	EnableUserShell             bool
 	EnableUserConfig            bool
 	MountHome                   bool
-	EnableUserMountHome 	    bool
+	EnableUserMountHome         bool
 	MountTmp                    bool
-	EnableUserMountTmp	    bool
+	EnableUserMountTmp          bool
 	MountDockerSocket           bool
 	EnableUserMountDockerSocket bool
 	DockerSocket                string
-	EnableUserDockerSocket	    bool
+	EnableUserDockerSocket      bool
 	Entrypoint                  string
 	EnableUserEntrypoint        bool
 }
@@ -42,13 +42,13 @@ type configInterpolation struct {
 }
 
 var defaultConfig = Configuration{
-	ImageName:           "busybox",
-    MountHomeFrom:       "%h",
-	MountHomeTo:         "%h",
-	ContainerUsername:   "%u",
-	Shell:               "/bin/ash",
-	DockerSocket:        "/var/run/docker.sock",
-	Entrypoint:	     "internal",
+	ImageName:         "busybox",
+	MountHomeFrom:     "%h",
+	MountHomeTo:       "%h",
+	ContainerUsername: "%u",
+	Shell:             "/bin/ash",
+	DockerSocket:      "/var/run/docker.sock",
+	Entrypoint:        "internal",
 }
 
 func loadAllConfig(user string, homedir string) (config Configuration, err error) {
@@ -102,9 +102,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	if (!blacklist || old.EnableUserMountHomeTo) && new.MountHomeTo != "" {
 		old.MountHomeTo = new.MountHomeTo
 	}
-    if (!blacklist || old.EnableUserMountHomeFrom) && new.MountHomeFrom != "" {
-        old.MountHomeFrom = new.MountHomeFrom
-    }
+	if (!blacklist || old.EnableUserMountHomeFrom) && new.MountHomeFrom != "" {
+		old.MountHomeFrom = new.MountHomeFrom
+	}
 	if (!blacklist || old.EnableUserDockerSocket) && new.DockerSocket != "" {
 		old.DockerSocket = new.DockerSocket
 	}
@@ -120,7 +120,7 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	if (!blacklist || old.EnableUserEntrypoint) && new.Entrypoint != "" {
 		old.Entrypoint = new.Entrypoint
 	}
-        if !blacklist && new.EnableUserConfig == true {
+	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
 	}
 	return old

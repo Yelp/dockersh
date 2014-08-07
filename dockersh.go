@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if os.Args[0] == "/init" {
-        fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
+		fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
 		// Wait for terminating signal
 		sc := make(chan os.Signal, 2)
 		signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
@@ -41,7 +41,7 @@ func realMain() int {
 	configInterpolations := configInterpolation{homedir, username}
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
 	realHomedirTo := tmplConfigVar(config.MountHomeTo, &configInterpolations)
-    realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
+	realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
 	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
 	realShell := tmplConfigVar(config.Shell, &configInterpolations)
 	containerName := fmt.Sprintf("%s_dockersh", realUsername)
@@ -54,7 +54,7 @@ func realMain() int {
 			return 1
 		}
 	}
-    // FIXME - Should this be it's own setting not realHomedirTo
+	// FIXME - Should this be it's own setting not realHomedirTo
 	nsenterexec(pid, uid, gid, realHomedirTo, realShell)
 	return 0
 }
