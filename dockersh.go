@@ -56,7 +56,7 @@ func realMain() int {
 	}
 	err = nsenterexec(pid, uid, gid, realHomedirTo, realShell)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR")
+		fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
 		return 1
 	}
 	return 0
