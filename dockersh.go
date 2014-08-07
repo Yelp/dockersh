@@ -31,13 +31,17 @@ func realMain() int {
 	if err != nil {
 		return 1
 	}
+	/* Woo! We found nsenter, now to move onto more interesting things */
+	username, homedir, uid, gid, err := getCurrentUser()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not get current user: %v", err)
+		return 1
+	}
+	config, err := loadAllConfig(username, homedir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return 1
 	}
-	/* Woo! We found nsenter, now to move onto more interesting things */
-	username, homedir, uid, gid, err := getCurrentUser()
-	config, err := loadAllConfig(username, homedir)
 	configInterpolations := configInterpolation{homedir, username}
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
 	realHomedirTo := tmplConfigVar(config.MountHomeTo, &configInterpolations)
@@ -56,7 +60,7 @@ func realMain() int {
 	}
 	err = nsenterexec(pid, uid, gid, realHomedirTo, realShell)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v", err)
 		return 1
 	}
 	return 0
