@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.google.com/p/gcfg"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -54,14 +53,12 @@ var defaultConfig = Configuration{
 func loadAllConfig(user string, homedir string) (config Configuration, err error) {
 	globalconfig, err := loadConfig(loadableFile("/etc/dockersh"), user)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-		return config, errors.New("could not load config")
+		return config, err
 	}
 	if globalconfig.EnableUserConfig == true {
 		localconfig, err := loadConfig(loadableFile(fmt.Sprintf("%s/.dockersh", homedir)), user)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-			return config, errors.New("could not load config")
+			return config, err
 		}
 		return mergeConfigs(mergeConfigs(defaultConfig, globalconfig, false), localconfig, true), nil
 	} else {
@@ -75,8 +72,12 @@ type loadableFile string
 func (fn loadableFile) Getcontents() []byte {
 	localConfigFile, err := os.Open(string(fn))
 	if err != nil {
+		panic(fmt.Sprintf("Could not open: %s", string(fn)))
 	}
 	b, err := ioutil.ReadAll(localConfigFile)
+	if err != nil {
+		panic(fmt.Sprintf("Could not read file: %v", err))
+	}
 	localConfigFile.Close()
 	return b
 }
