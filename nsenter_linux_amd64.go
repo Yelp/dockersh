@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
 	"github.com/docker/libcontainer/security/capabilities"
