@@ -32,7 +32,7 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	// container process namespace, so we can chdir there later.
 	cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), wd))
 	if cwderr != nil {
-		panic("Could not open fd to cwd")
+		return errors.New(fmt.Sprintf("Could not open fd to desired cwd: %s", wd))
 	}
 	if strings.HasPrefix(shell, "/") != true {
 		return errors.New(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))

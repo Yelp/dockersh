@@ -2,6 +2,7 @@ package main
 
 import (
 	"code.google.com/p/gcfg"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -69,25 +70,26 @@ func loadAllConfig(user string, homedir string) (config Configuration, err error
 
 type loadableFile string
 
-func (fn loadableFile) Getcontents() []byte {
+func (fn loadableFile) Getcontents() ([]byte, error) {
 	localConfigFile, err := os.Open(string(fn))
+	var b []byte
 	if err != nil {
-		panic(fmt.Sprintf("Could not open: %s", string(fn)))
+		return b, errors.New(fmt.Sprintf("Could not open: %s", string(fn)))
 	}
-	b, err := ioutil.ReadAll(localConfigFile)
+	b, err = ioutil.ReadAll(localConfigFile)
 	if err != nil {
-		panic(fmt.Sprintf("Could not read file: %v", err))
+		return b, err
 	}
 	localConfigFile.Close()
-	return b
+	return b, nil
 }
 
 func loadConfig(filename loadableFile, user string) (config Configuration, err error) {
-	bytes := filename.Getcontents()
+	bytes, err := filename.Getcontents()
 	if err != nil {
-		return
+		return config, err
 	}
-	return (loadConfigFromString(bytes, user))
+	return loadConfigFromString(bytes, user)
 }
 
 func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Configuration) {
@@ -134,7 +136,7 @@ func loadConfigFromString(bytes []byte, user string) (config Configuration, err 
 	}{}
 	err = gcfg.ReadStringInto(&inicfg, string(bytes))
 	if err != nil {
-		return
+		return config, err
 	}
 	if inicfg.User[user] == nil {
 		return inicfg.Dockersh, nil
