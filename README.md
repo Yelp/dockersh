@@ -1,7 +1,7 @@
 dockersh
 ========
 
-A user shell for isolated environments.
+A user shell for isolated, containerized environments.
 
 What is this?
 =============
@@ -14,9 +14,8 @@ then spawn a new interactive shell in the container's namespace.
 dockersh can be used as a shell in ``/etc/passwd`` or as an ssh ``ForceCommand``.
 
 
-This allows you to have a single ssh process, on the normal ssh port, and gives
-a secure way to connect users into their own individual docker
-containers.
+This allows you to have a single ssh process on the normal ssh port which places user
+sessions into their own individual docker containers in a secure and locked down manor.
 
 Why do I want this?
 ===================
@@ -27,25 +26,30 @@ own individual docker container (acting like a lightweight VM), with their homed
 system (so that user data is persistent between container restarts), but with it's own kernel namespaces for
 processes and networking.
 
-This can be used for more easily seperating each user's processes from the rest of the system
-and having further per user constraints (e.g. memory limit all of the user's processes,
-or limit their aggregate bandwidth etc)
+
+This means that the user is isolated from the rest of the system, and they can only see their own processes,
+and have their own network stack. This gives better privacy between users, and can also be used for more easily
+seperating each user's processes from the rest of the system with per user constraints (e.g. memory limit all of
+the user's processes, or to limit their aggregate bandwidth etc)
+
 
 Normally to give users individual containers you have to run an ssh daemon in each
 container, and either have have a different port for each user to ssh to or some nasty
 Forcecommand hacks (which only work with agent forwarding from the client).
 
+
 Dockersh eliminates the need for any of these techiques by acting like a regular
-shell which can be used in /etc/passwd or as an ssh [ForceCommand](http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/sshd_config.5?query=sshd_config).  
+shell which can be used in ``/etc/passwd`` or as an ssh
+[ForceCommand](http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/sshd_config.5?query=sshd_config).  
 This allows you to have a single ssh process, on the normal ssh port, and gives
-a (hopefully) secure way to connect users into their own individual docker
+a secure way to connect users into their own individual docker
 containers.
 
 SECURITY WARNING
 ================
 
 dockersh tries hard to drop all priviliges as soon as possible, including disabling 
-the suid, sgid, raw sockets and mknod capabilities of the target process (and all children)
+the suid, sgid, raw sockets and mknod capabilities of the target process (and all children).
 
 *WARNING:* This project was implemented in 48 hours during a Yelp hackathon, it _should not_ be considered
 stable, secure or ready for production use - here be dragons. Please expect to get rooted and/or for demons
