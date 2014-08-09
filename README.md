@@ -1,3 +1,5 @@
+![Build status](https://travis-ci.org/Yelp/dockersh.svg)
+
 dockersh
 ========
 
