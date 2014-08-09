@@ -133,9 +133,9 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 		// FIXME: Deal with SIGSTOP on the child in the same way nsenter does?
 		/* FIXME: Wait can detect if the child (immediately) fails, but better to do
 		that reporting in the child process? Not sure, don't like throwing away err */
-		if !pstate.Exited() {
+		/*if !pstate.Exited() {
 			panic("Child has NOT exited")
-		}
+		}*/
 		return nil
 	}
 
