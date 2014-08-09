@@ -22,7 +22,7 @@ Why do I want this?
 
 You want to allow multiple users to ssh onto a single box, but you'd like some isolation
 between those users. With dockersh each user enters their
-own individual docker container (acting like a lightweight VM), with their homedirectory mounted from the host
+own individual docker container (acting like a lightweight VM), with their home directory mounted from the host
 system (so that user data is persistent between container restarts), but with it's own kernel namespaces for
 processes and networking.
 
@@ -49,7 +49,8 @@ SECURITY WARNING
 ================
 
 dockersh tries hard to drop all priviliges as soon as possible, including disabling 
-the suid, sgid, raw sockets and mknod capabilities of the target process (and all children).
+the suid, sgid, raw sockets and mknod capabilities of the target process (and all children),
+however this doesn't mean that it is safe enough to allow public access to dockersh containers!
 
 *WARNING:* Whilst this project tries to make users inside containers have lowered privileges
 and drops capabilities to limit users ability to escalate their privilege level, it is not certain
@@ -57,7 +58,7 @@ to be completely secure. Notably when Docker adds user namespace support, this c
 to further lock down privilidges.
 
 *SECOND WARNING:* The dockersh binary needs the suid bit set so that it can make the syscalls to adjust
-kernel namespaces, so any security issues in this code are extremely dangerous.
+kernel namespaces, so any security issues in this code are likely to be exploitable to root.
 
 Requirements
 ============
@@ -104,7 +105,7 @@ You need to install golang (tested on >= 1.3), then you should just be able to r
     go get
     make
 
-and a 'dockersh' binary will be generated in your $GOPATH (or your current
+and a 'dockersh' binary will be generated in your ``$GOPATH`` (or your current
 working directory if ``$GOPATH`` isn't set). N.B. This binary needs to be moved to where
 you would like to install it (recommended ``/usr/local/bin``), and owned by root + u+s
 (suid). This is done automatically if you use the Docker based installed, but
@@ -127,24 +128,16 @@ Configuration
 
 We use [gcfg](https://code.google.com/p/gcfg/) to read configs in an ini style format.
 
-Each file has a ``[docker]`` block in it, and zero or more ``[user "foo"]`` blocks.
+The global config file, ``/etc/dockershrc`` has a ``[docker]`` block in it, and zero or more ``[user "foo"]`` blocks.
 
-This can be used to enable or disable setting on a per user basis.
-
-Each user can (optionally) have a per user config, although this can be disabled.
-
-~/.dockersh
------------
-
-Local (per user) settings for a specific user's dockersh instance.
-
-Settings should be contained prefixed with a ``[docker]`` block
+This can be used to set settings globally or per user, and also to enable the setting
+of settings in the (optional) per user configuration file (``~/.dockersh``), if enabled.
 
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
-imagename  | String | Mandatory, the name of the image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
-mounthome | Bool | If the users home directory should be mounted in the target container | true | false
-mounttmp | String | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
+imagename  | String | The name of the container image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
+mounthome | Bool | If the users home directory should be mounted in the target container | false | true
+mounttmp | Bool | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
 mounthometo | String | Where to map the user's home directory inside the container. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 mounthomefrom | String | Where to map the user's home directory from on the host. | $HOME (from /etc/passwd) | /opt/home/%u
 containerusername | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
@@ -152,16 +145,7 @@ shell | String | The shell that should be started for the user inside the contai
 mountdockersocket | Bool | If to mount the docker socket from the host. (DANGEROUS) | false | true
 dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
 entrypoint | String | The entrypoint for the persistent process to keep the container running | internal | /sbin/yoursupervisor
-
-/etc/dockershrc
----------------
-
-Global settings for all dockersh instances. Allows you to set settings for all users (in a ``[docker block]``)
-or specific users (in a ``[user "username"]`` block), on enable setting settings in per user  ~/.dockersh
-
-Setting name  | Type | Description | Default value | Example value
-------------- | ---- | ----------- | ------------- | -------------
-enableuserconfig | bool | Set to true to enable reading of per user ~/.dockersh files | false | true
+enableuserconfig | bool | Set to true to enable reading of per user ``~/.dockersh`` files | false | true
 enableuserimagename | bool | Set to true to enable reading of imagename parameter from ~/.dockersh files | false | true
 enableusermounthome | bool | Set to true to enable reading of mounthome parameter from ~/.dockersh files | false | true
 enableusermounttmp | bool | Set to true to enable reading of mounttmp parameter from ~/.dockersh files | false | true
@@ -171,12 +155,18 @@ enableusercontainerusername | bool | Set to true to enable reading of containeru
 enableusershell | bool | Set to true to enable reading of shell parameter from ~/.dockersh files | false | true
 enableuserentrypoint | bool | Set to true to enable users to set their own supervisor daemon / entry point to the container for PID 1 | false | true
 
+Notes:
+
+  * Boolean settings are set by just putting the setting name in the config (see examples below).
+  * You must set both ``enableuserconfig`` and the specific ``enableuserxxx`` setting that you want in ``/etc/dockersh`` to
+    get any values parsed from ``~/.dockersh``
+
 Example configs
 ---------------
 
 Note the liberal use of the blacklistuserconfig
 
-Sets up a fairly restricted shell environment, with one admin user being allowed additional privs, set the following /etc/dockersh 
+Sets up a fairly restricted shell environment, with one admin user being allowed additional privs, set the following ``/etc/dockersh``
 
     [dockersh]
     imagename = ubuntu:precise
@@ -188,7 +178,7 @@ Sets up a fairly restricted shell environment, with one admin user being allowed
     mountdockersocket
     
 In a less restrictive environment, you may allow users to choose their own container and shell, from a 'shell' container
-they have uploaded to the registry, and have ssh agent forwarding working, with the following /etc/dockersh
+they have uploaded to the registry, and have ssh agent forwarding working, with the following ``/etc/dockersh``
 
     [dockersh]
     imagename = "%u/shell"
@@ -200,7 +190,7 @@ they have uploaded to the registry, and have ssh agent forwarding working, with 
     [user "someadminguy"]
     mountdockersocket
 
-And an example user's ~/.dockersh
+And an example user's ``~/.dockersh``
 
     [dockersh]
     shell = /bin/zsh
@@ -225,7 +215,6 @@ TODO
  * Make the darwin nsenter version less crazy - or kill as less features?
  * Allow setting the max memory for the container's processes
  * Allow setting the CMD of the root process
- * Allow setting the entrypoint of the root process to be something other than "internal"
  * Find a better way to make ssh agent sockets work than to bind /tmp
  * Expose ability to mount additional volumes in the config
  * Expose ability to pass arbitrary options to docker in the config.
