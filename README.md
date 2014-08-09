@@ -130,7 +130,7 @@ Configuration
 
 We use [gcfg](https://code.google.com/p/gcfg/) to read configs in an ini style format.
 
-The global config file, ``/etc/dockershrc`` has a ``[docker]`` block in it, and zero or more ``[user "foo"]`` blocks.
+The global config file, ``/etc/dockershrc`` has a ``[dockersh]`` block in it, and zero or more ``[user "foo"]`` blocks.
 
 This can be used to set settings globally or per user, and also to enable the setting
 of settings in the (optional) per user configuration file (``~/.dockersh``), if enabled.
