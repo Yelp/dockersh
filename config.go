@@ -11,8 +11,8 @@ import (
 type Configuration struct {
 	ImageName                   string
 	EnableUserImageName         bool
-    MountHomeFrom               string
-    EnableUserMountHomeFrom     bool
+	MountHomeFrom               string
+	EnableUserMountHomeFrom     bool
 	MountHomeTo                 string
 	EnableUserMountHomeTo       bool
 	ContainerUsername           string
@@ -21,13 +21,13 @@ type Configuration struct {
 	EnableUserShell             bool
 	EnableUserConfig            bool
 	MountHome                   bool
-	EnableUserMountHome 	    bool
+	EnableUserMountHome         bool
 	MountTmp                    bool
-	EnableUserMountTmp	    bool
+	EnableUserMountTmp          bool
 	MountDockerSocket           bool
 	EnableUserMountDockerSocket bool
 	DockerSocket                string
-	EnableUserDockerSocket	    bool
+	EnableUserDockerSocket      bool
 	Entrypoint                  string
 	EnableUserEntrypoint        bool
 }
@@ -42,26 +42,24 @@ type configInterpolation struct {
 }
 
 var defaultConfig = Configuration{
-	ImageName:           "busybox",
-    MountHomeFrom:       "%h",
-	MountHomeTo:         "%h",
-	ContainerUsername:   "%u",
-	Shell:               "/bin/ash",
-	DockerSocket:        "/var/run/docker.sock",
-	Entrypoint:	     "internal",
+	ImageName:         "busybox",
+	MountHomeFrom:     "%h",
+	MountHomeTo:       "%h",
+	ContainerUsername: "%u",
+	Shell:             "/bin/ash",
+	DockerSocket:      "/var/run/docker.sock",
+	Entrypoint:        "internal",
 }
 
 func loadAllConfig(user string, homedir string) (config Configuration, err error) {
 	globalconfig, err := loadConfig(loadableFile("/etc/dockersh"), user)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-		return config, errors.New("could not load config")
+		return config, err
 	}
 	if globalconfig.EnableUserConfig == true {
 		localconfig, err := loadConfig(loadableFile(fmt.Sprintf("%s/.dockersh", homedir)), user)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "could not load config: %v", err)
-			return config, errors.New("could not load config")
+			return config, err
 		}
 		return mergeConfigs(mergeConfigs(defaultConfig, globalconfig, false), localconfig, true), nil
 	} else {
@@ -72,21 +70,26 @@ func loadAllConfig(user string, homedir string) (config Configuration, err error
 
 type loadableFile string
 
-func (fn loadableFile) Getcontents() []byte {
+func (fn loadableFile) Getcontents() ([]byte, error) {
 	localConfigFile, err := os.Open(string(fn))
+	var b []byte
 	if err != nil {
+		return b, errors.New(fmt.Sprintf("Could not open: %s", string(fn)))
 	}
-	b, err := ioutil.ReadAll(localConfigFile)
+	b, err = ioutil.ReadAll(localConfigFile)
+	if err != nil {
+		return b, err
+	}
 	localConfigFile.Close()
-	return b
+	return b, nil
 }
 
 func loadConfig(filename loadableFile, user string) (config Configuration, err error) {
-	bytes := filename.Getcontents()
+	bytes, err := filename.Getcontents()
 	if err != nil {
-		return
+		return config, err
 	}
-	return (loadConfigFromString(bytes, user))
+	return loadConfigFromString(bytes, user)
 }
 
 func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Configuration) {
@@ -102,9 +105,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	if (!blacklist || old.EnableUserMountHomeTo) && new.MountHomeTo != "" {
 		old.MountHomeTo = new.MountHomeTo
 	}
-    if (!blacklist || old.EnableUserMountHomeFrom) && new.MountHomeFrom != "" {
-        old.MountHomeFrom = new.MountHomeFrom
-    }
+	if (!blacklist || old.EnableUserMountHomeFrom) && new.MountHomeFrom != "" {
+		old.MountHomeFrom = new.MountHomeFrom
+	}
 	if (!blacklist || old.EnableUserDockerSocket) && new.DockerSocket != "" {
 		old.DockerSocket = new.DockerSocket
 	}
@@ -120,7 +123,7 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	if (!blacklist || old.EnableUserEntrypoint) && new.Entrypoint != "" {
 		old.Entrypoint = new.Entrypoint
 	}
-        if !blacklist && new.EnableUserConfig == true {
+	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
 	}
 	return old
@@ -133,7 +136,7 @@ func loadConfigFromString(bytes []byte, user string) (config Configuration, err 
 	}{}
 	err = gcfg.ReadStringInto(&inicfg, string(bytes))
 	if err != nil {
-		return
+		return config, err
 	}
 	if inicfg.User[user] == nil {
 		return inicfg.Dockersh, nil

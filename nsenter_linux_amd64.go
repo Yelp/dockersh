@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
 	"github.com/docker/libcontainer/security/capabilities"
 	"os"
+	"path"
 	"strconv"
+	"strings"
 	"syscall"
 )
 
@@ -29,17 +32,16 @@ func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error)
 	// container process namespace, so we can chdir there later.
 	cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), wd))
 	if cwderr != nil {
-		panic("Could not open fd to cwd")
+		return errors.New(fmt.Sprintf("Could not open fd to desired cwd: %s", wd))
 	}
-
-	//if !string.HasPrefix(shell, "/") {
-	//	panic(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
-	//}
-	//shell = path.Clean(shell)
-	/*_, shellerr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), shell))
+	if strings.HasPrefix(shell, "/") != true {
+		return errors.New(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
+	}
+	shell = path.Clean(shell)
+	_, shellerr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), shell))
 	if shellerr != nil {
-		panic(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
-	}*/
+		return errors.New(fmt.Sprintf("Cannot find ynur shell %s inside your container", shell))
+	}
 
 	/* FIXME: Make these an array and loop through them, as this is gross */
 

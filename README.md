@@ -51,17 +51,13 @@ SECURITY WARNING
 dockersh tries hard to drop all priviliges as soon as possible, including disabling 
 the suid, sgid, raw sockets and mknod capabilities of the target process (and all children).
 
-*WARNING:* This project was implemented in 48 hours during a Yelp hackathon, it _should not_ be considered
-stable, secure or ready for production use - here be dragons. Please expect to get rooted and/or for demons
-to fly out of your nose if you use this software on a production host connected to the public internet.
+*WARNING:* Whilst this project tries to make users inside containers have lowered privileges
+and drops capabilities to limit users ability to escalate their privilege level, it is not certain
+to be completely secure. Notably when Docker adds user namespace support, this can be used
+to further lock down privilidges.
 
-*SECOND WARNING:* Whilst this project goes to some effort to make users inside containers have lowered privileges
-and limit their ability to escalate their privilege level inside containers, or on the host machine,
-this is *NOT* watertight. It will not be watertight until Docker fully supports user namespaces. Notably,
-if you let users pick their own containers to run, they can probably do undesireable things.
-
-*THIRD WARNING:* The dockersh binary needs the suid bit set so that it can make the syscalls to adjust
-kernel namespaces, so any security issues in this code *will* allow attackers to escalate to root.
+*SECOND WARNING:* The dockersh binary needs the suid bit set so that it can make the syscalls to adjust
+kernel namespaces, so any security issues in this code are extremely dangerous.
 
 Requirements
 ============

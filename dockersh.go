@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if os.Args[0] == "/init" {
-        fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
+		fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
 		// Wait for terminating signal
 		sc := make(chan os.Signal, 2)
 		signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
@@ -31,17 +31,21 @@ func realMain() int {
 	if err != nil {
 		return 1
 	}
+	/* Woo! We found nsenter, now to move onto more interesting things */
+	username, homedir, uid, gid, err := getCurrentUser()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not get current user: %v", err)
+		return 1
+	}
+	config, err := loadAllConfig(username, homedir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
 		return 1
 	}
-	/* Woo! We found nsenter, now to move onto more interesting things */
-	username, homedir, uid, gid, err := getCurrentUser()
-	config, err := loadAllConfig(username, homedir)
 	configInterpolations := configInterpolation{homedir, username}
 	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
 	realHomedirTo := tmplConfigVar(config.MountHomeTo, &configInterpolations)
-    realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
+	realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
 	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
 	realShell := tmplConfigVar(config.Shell, &configInterpolations)
 	containerName := fmt.Sprintf("%s_dockersh", realUsername)
@@ -54,7 +58,10 @@ func realMain() int {
 			return 1
 		}
 	}
-    // FIXME - Should this be it's own setting not realHomedirTo
-	nsenterexec(pid, uid, gid, realHomedirTo, realShell)
+	err = nsenterexec(pid, uid, gid, realHomedirTo, realShell)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v", err)
+		return 1
+	}
 	return 0
 }
