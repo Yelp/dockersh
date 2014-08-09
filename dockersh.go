@@ -39,7 +39,7 @@ func realMain() int {
 	}
 	config, err := loadAllConfig(username, homedir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not load config: %v", err)
+		fmt.Fprintf(os.Stderr, "Could not load config: %v\n", err)
 		return 1
 	}
 	configInterpolations := configInterpolation{homedir, username}
