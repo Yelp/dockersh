@@ -1,5 +1,5 @@
 dockersh: test
-	go fmt && go build
+	go fmt && go build -ldflags "-linkmode external -extldflags -static"
  
 test:
 	go test
