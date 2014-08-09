@@ -142,20 +142,22 @@ mounthome | Bool | If the users home directory should be mounted in the target c
 mounttmp | Bool | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
 mounthometo | String | Where to map the user's home directory inside the container. | $HOME (from /etc/passwd) | /opt/home/myhomedir
 mounthomefrom | String | Where to map the user's home directory from on the host. | $HOME (from /etc/passwd) | /opt/home/%u
+usercwd | String | Where to chdir into the container when starting a shell. | $HOME (from /etc/passwd) | /
 containerusername | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 mountdockersocket | Bool | If to mount the docker socket from the host. (DANGEROUS) | false | true
 dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
 entrypoint | String | The entrypoint for the persistent process to keep the container running | internal | /sbin/yoursupervisor
-enableuserconfig | bool | Set to true to enable reading of per user ``~/.dockersh`` files | false | true
-enableuserimagename | bool | Set to true to enable reading of imagename parameter from ~/.dockersh files | false | true
-enableusermounthome | bool | Set to true to enable reading of mounthome parameter from ~/.dockersh files | false | true
-enableusermounttmp | bool | Set to true to enable reading of mounttmp parameter from ~/.dockersh files | false | true
-enableusermounthometo | bool | Set to true to enable reading of mounthometo parameter from ~/.dockersh files | false | true
-enableusermounthomefrom | bool | Set to true to enable reading of mounthomefrom parameter from ~/.dockersh files | false | true
-enableusercontainerusername | bool | Set to true to enable reading of containerusername parameter from ~/.dockersh files | false | true
-enableusershell | bool | Set to true to enable reading of shell parameter from ~/.dockersh files | false | true
-enableuserentrypoint | bool | Set to true to enable users to set their own supervisor daemon / entry point to the container for PID 1 | false | true
+enableuserconfig | Bool | Set to true to enable reading of per user ``~/.dockersh`` files | false | true
+enableuserimagename | Bool | Set to true to enable reading of imagename parameter from ``~/.dockersh`` files | false | true
+enableusermounthome | Bool | Set to true to enable reading of mounthome parameter from ``~/.dockersh`` files | false | true
+enableusermounttmp | Bool | Set to true to enable reading of mounttmp parameter from ``~/.dockersh`` files | false | true
+enableusermounthometo | Bool | Set to true to enable reading of mounthometo parameter from ``~/.dockersh`` files | false | true
+enableusermounthomefrom | Bool | Set to true to enable reading of mounthomefrom parameter from ``~/.dockersh`` files | false | true
+enableuserusercwd | Bool | Set to true to enable reading of usercwd parameter from ``~/.dockersh`` files | false | true
+enableusercontainerusername | bool | Set to true to enable reading of containerusername parameter from ``~/.dockersh`` files | false | true
+enableusershell | Bool | Set to true to enable reading of shell parameter from ``~/.dockersh`` files | false | true
+enableuserentrypoint | Bool | Set to true to enable users to set their own supervisor daemon / entry point to the container for PID 1 | false | true
 
 Notes:
 

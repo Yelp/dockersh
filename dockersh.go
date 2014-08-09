@@ -48,6 +48,7 @@ func realMain() int {
 	realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
 	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
 	realShell := tmplConfigVar(config.Shell, &configInterpolations)
+	realUserCwd := tmplConfigVar(config.UserCwd, &configInterpolations)
 	containerName := fmt.Sprintf("%s_dockersh", realUsername)
 
 	pid, err := dockerpid(containerName)
@@ -58,7 +59,7 @@ func realMain() int {
 			return 1
 		}
 	}
-	err = nsenterexec(pid, uid, gid, realHomedirTo, realShell)
+	err = nsenterexec(pid, uid, gid, realUserCwd, realShell)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v\n", err)
 		return 1

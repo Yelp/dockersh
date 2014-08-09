@@ -15,6 +15,8 @@ type Configuration struct {
 	EnableUserMountHomeFrom     bool
 	MountHomeTo                 string
 	EnableUserMountHomeTo       bool
+	UserCwd			    string
+	EnableUserUserCwd	    bool
 	ContainerUsername           string
 	EnableUserContainerUsername bool
 	Shell                       string
@@ -45,6 +47,7 @@ var defaultConfig = Configuration{
 	ImageName:         "busybox",
 	MountHomeFrom:     "%h",
 	MountHomeTo:       "%h",
+	UserCwd:           "%h",
 	ContainerUsername: "%u",
 	Shell:             "/bin/ash",
 	DockerSocket:      "/var/run/docker.sock",
@@ -122,6 +125,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	}
 	if (!blacklist || old.EnableUserEntrypoint) && new.Entrypoint != "" {
 		old.Entrypoint = new.Entrypoint
+	}
+	if (!blacklist || old.EnableUserUserCwd) && new.UserCwd != "" {
+		old.UserCwd = new.UserCwd
 	}
 	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
