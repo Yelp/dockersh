@@ -60,7 +60,7 @@ func realMain() int {
 	}
 	err = nsenterexec(pid, uid, gid, realHomedirTo, realShell)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v", err)
+		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v\n", err)
 		return 1
 	}
 	return 0
