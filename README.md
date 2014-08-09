@@ -168,9 +168,14 @@ Notes:
 Example configs
 ---------------
 
-Note the liberal use of the blacklistuserconfig
+A very restricted environment, with only the busybox container, ``/etc/dockersh`` looks like this:
 
-Sets up a fairly restricted shell environment, with one admin user being allowed additional privs, set the following ``/etc/dockersh``
+    [dockersh]
+    imagename = busybox
+    shell = /bin/ash
+    usercwd = /
+
+A fairly restricted shell environment, but with homedirectories and one admin user being allowed additional privs, set the following ``/etc/dockersh``
 
     [dockersh]
     imagename = ubuntu:precise
