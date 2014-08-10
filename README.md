@@ -152,6 +152,7 @@ shell | String | The shell that should be started for the user inside the contai
 mountdockersocket | Bool | If to mount the docker socket from the host. (DANGEROUS) | false | true
 dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
 entrypoint | String | The entrypoint for the persistent process to keep the container running | internal | /sbin/yoursupervisor
+cmd | Array of Strings | Additional parameters to pass when launching the container as the command line | | -c'/echo foo'
 enableuserconfig | Bool | Set to true to enable reading of per user ``~/.dockersh`` files | false | true
 enableuserimagename | Bool | Set to true to enable reading of imagename parameter from ``~/.dockersh`` files | false | true
 enableusercontainername | Bool | Set to true to enable reading of containername parameter from ``~/.dockersh`` files. (Dangerous!) | false | true
@@ -163,12 +164,14 @@ enableuserusercwd | Bool | Set to true to enable reading of usercwd parameter fr
 enableusercontainerusername | bool | Set to true to enable reading of containerusername parameter from ``~/.dockersh`` files | false | true
 enableusershell | Bool | Set to true to enable reading of shell parameter from ``~/.dockersh`` files | false | true
 enableuserentrypoint | Bool | Set to true to enable users to set their own supervisor daemon / entry point to the container for PID 1 | false | true
+enableusercmd | Bool | Set to true to enable users to set the additional command parameters to the entry point | false | true
 
 Notes:
 
   * Boolean settings are set by just putting the setting name in the config (see examples below).
   * You must set both ``enableuserconfig`` and the specific ``enableuserxxx`` setting that you want in ``/etc/dockersh`` to
     get any values parsed from ``~/.dockersh``
+  * Array values are represented by having the same config key appear multiple times, once per value.
 
 Config interpolations
 ---------------------

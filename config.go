@@ -34,6 +34,8 @@ type Configuration struct {
 	EnableUserDockerSocket      bool
 	Entrypoint                  string
 	EnableUserEntrypoint        bool
+	Cmd			    []string
+	EnableUserCmd		    bool
 }
 
 func (c Configuration) Dump() string {
