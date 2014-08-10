@@ -29,7 +29,7 @@ func dockerpid(name string) (pid int, err error) {
 	return pid, nil
 }
 
-func dockerstart(username string, homedirfrom string, homedirto string, name string, container string, dockersock string, bindhome bool, bindtmp bool, binddocker bool, init string, cmdargs []string) (pid int, err error) {
+func dockerstart(username string, homedirfrom string, homedirto string, name string, container string, dockersock string, bindhome bool, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
@@ -44,7 +44,11 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 	}
 	var cmdtxt = []string{"run", "-d", "-u", username,
 		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro"}
-
+	if len(dockeropts) > 0 {
+		for _, element := range dockeropts {
+			cmdtxt = append(cmdtxt, element)
+		}
+	}
 	if bindtmp {
 		cmdtxt = append(cmdtxt, "-v", "/tmp:/tmp")
 	}

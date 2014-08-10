@@ -153,6 +153,7 @@ mountdockersocket | Bool | If to mount the docker socket from the host. (DANGERO
 dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
 entrypoint | String | The entrypoint for the persistent process to keep the container running | internal | /sbin/yoursupervisor
 cmd | Array of Strings | Additional parameters to pass when launching the container as the command line | | -c'/echo foo'
+dockeropt | Array of Strings | Additional options to pass to docker when launching the container. Can be used to mount additional volumes or limit memory etc. | | -v /some/place:/foovol
 enableuserconfig | Bool | Set to true to enable reading of per user ``~/.dockersh`` files | false | true
 enableuserimagename | Bool | Set to true to enable reading of imagename parameter from ``~/.dockersh`` files | false | true
 enableusercontainername | Bool | Set to true to enable reading of containername parameter from ``~/.dockersh`` files. (Dangerous!) | false | true
@@ -165,6 +166,7 @@ enableusercontainerusername | bool | Set to true to enable reading of containeru
 enableusershell | Bool | Set to true to enable reading of shell parameter from ``~/.dockersh`` files | false | true
 enableuserentrypoint | Bool | Set to true to enable users to set their own supervisor daemon / entry point to the container for PID 1 | false | true
 enableusercmd | Bool | Set to true to enable users to set the additional command parameters to the entry point | false | true
+enableuserdockeropt | Bool | Set to true to enable users to set additional options to the docker container that's started. (Dangerous!) | false | true
 
 Notes:
 
@@ -236,14 +238,10 @@ TODO
  * How do we deal with changed settings (i.e. when to recycle the container)
     * Document just kill 1 inside the container?
  * Fix up go panics when exiting the root container.
- * More config settings?
  * getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
  * Decent test cases
  * Make the darwin nsenter version less crazy - or kill as less features?
- * Allow setting the max memory for the container's processes
  * Find a better way to make ssh agent sockets work than to bind /tmp
- * Expose ability to mount additional volumes in the config
- * Expose ability to pass arbitrary options to docker in the config.
 
 Contributing
 ============

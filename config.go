@@ -36,6 +36,8 @@ type Configuration struct {
 	EnableUserEntrypoint        bool
 	Cmd                         []string
 	EnableUserCmd               bool
+	DockerOpt                   []string
+	EnableUserDockerOpt         bool
 }
 
 func (c Configuration) Dump() string {
@@ -139,6 +141,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	}
 	if (!blacklist || old.EnableUserCmd) && len(new.Cmd) > 0 {
 		old.Cmd = new.Cmd
+	}
+	if (!blacklist || old.EnableUserDockerOpt) && len(new.DockerOpt) > 0 {
+		old.DockerOpt = new.DockerOpt
 	}
 	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
