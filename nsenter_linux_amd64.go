@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
 	"github.com/docker/libcontainer/security/capabilities"
+	"github.com/docker/libcontainer/namespaces"
 	"os"
 	"path"
 	"strconv"
@@ -23,40 +24,6 @@ const (
 	SIGCHLD     = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
 )
 
-var cGroups = []string{ // FIXME - We should discover this dynamically
-	"blkio",
-	"cpuacct",
-	"cpu",
-	"devices",
-	"freezer",
-	"memory",
-	"perf_event",
-}
-
-func addProcessToCgroupsForContainer(containerSha string, pid int) (err error) {
-	for _, element := range cGroups {
-		err = addProcessToCgroupForContainer(containerSha, element, pid)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func addProcessToCgroupForContainer(containerSha string, group string, pid int) (err error) {
-	path := fmt.Sprintf("/sys/fs/cgroup/%s/docker/%s/tasks", group, containerSha)
-	f, err := os.Create(path)
-	if err != nil {
-		panic(fmt.Sprintf("Could not open %s: %s", path, err.Error()))
-	}
-	_, err = f.WriteString(fmt.Sprintf("%s\n", strconv.Itoa(pid)))
-	if err != nil {
-		panic("Could not write PID")
-	}
-	f.Close()
-	return nil
-}
-
 func doChrootChwd(rootfd *os.File, cwdfd *os.File) (err error) {
 	_, _, echrootdir := syscall.Syscall(syscall.SYS_FCHDIR, rootfd.Fd(), 0, 0)
 	if echrootdir != 0 {
@@ -74,7 +41,7 @@ func doChrootChwd(rootfd *os.File, cwdfd *os.File) (err error) {
 	return nil
 }
 
-func nsenterexec(containerName string, uid int, gid int, wd string, shell string) (err error) {
+func nsenterexec(containerName string, uid int, gid int, groups []int, wd string, shell string) (err error) {
 	pid, err := dockerpid(containerName)
 	if err != nil {
 		panic(fmt.Sprintf("Could not get PID for container: %s", containerName))
@@ -83,6 +50,11 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	if err != nil {
 		panic(fmt.Sprintf("Could not get SHA for container: %s %s", err.Error(), containerName))
 	}
+	containerConfigLocation := fmt.Sprintf("/var/lib/docker/execdriver/native/%s/container.json", containerSha)
+      container, err := loadContainer(containerConfigLocation)
+       if err != nil {
+               panic(fmt.Sprintf("Could not load container configuration: %v", err))
+       }
 
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
 	if rooterr != nil {
@@ -176,7 +148,10 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 			panic(procerr)
 		}
 		// FIXME Race condition
-		err = addProcessToCgroupsForContainer(containerSha, proc.Pid)
+		_, err = namespaces.SetupCgroups(container, proc.Pid)
+		if err != nil {
+			panic(fmt.Sprintf("SetupCgroups failed: %s", err.Error()))
+		}
 
 		doChrootChwd(rootfd, cwdfd)
 
@@ -217,7 +192,7 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	// Drop groups, set to the primary group of the user.
 	// TODO: Add user's other groups from /etc/group?
 	if gid > 0 {
-		err = syscall.Setgroups([]int{}) // drop supplementary groups
+		err = syscall.Setgroups(groups) // drop supplementary groups
 		if err != nil {
 			panic("setgroups failed")
 		}
