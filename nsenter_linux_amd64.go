@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
 	"github.com/docker/libcontainer"
+	"github.com/docker/libcontainer/cgroups/fs"
 	"github.com/docker/libcontainer/security/capabilities"
 	"os"
 	"path"
@@ -50,7 +51,10 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 		panic(fmt.Sprintf("Could not get SHA for container: %s %s", err.Error(), containerName))
 	}
 	containerConfigLocation := fmt.Sprintf("/var/lib/docker/execdriver/native/%s/container.json", sha)
-	_, err = loadContainer(containerConfigLocation)
+	container, err := loadContainer(containerConfigLocation)
+	if err != nil {
+		panic(fmt.Sprintf("Could not load container configuration: %v", err))
+	}
 
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
 	if rooterr != nil {
@@ -157,6 +161,20 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(r1)))
 			panic(procerr)
 		}
+		fmt.Println("Setting up Cgroups from parent")
+		// FIXME - We exec the new shell before we apply these Cgroups, race condition!
+		cleaner, err := fs.Apply(container.Cgroups, proc.Pid)
+		if err != nil {
+			fmt.Println("Could not setup cgroups: %s", err.Error())
+			proc.Kill()
+			proc.Wait()
+			return err
+		}
+		if cleaner != nil {
+			defer cleaner.Cleanup()
+		}
+		fmt.Println("Setting up Cgroups in child")
+
 		_, _ = proc.Wait()
 		// FIXME: Deal with SIGSTOP on the child in the same way nsenter does?
 		/* FIXME: Wait can detect if the child (immediately) fails, but better to do
@@ -168,7 +186,7 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	}
 
 	// We're definitely in the child process by the time we get here.
-
+	fmt.Println("In child, dropping caps")
 	// Drop capabilities except those in the whitelist, from https://github.com/docker/docker/blob/master/daemon/execdriver/native/template/default_template.go
 	cape := capabilities.DropBoundingSet([]string{
 		"CHOWN",
@@ -193,6 +211,7 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	// Drop groups, set to the primary group of the user.
 	// TODO: Add user's other groups from /etc/group?
 	if gid > 0 {
+		fmt.Println("In child, dropping groups")
 		err = syscall.Setgroups([]int{}) // drop supplementary groups
 		if err != nil {
 			panic("setgroups failed")
@@ -204,6 +223,7 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	}
 	// Change uid from root down to the actual user
 	if uid > 0 {
+		fmt.Println("In child, dropping uid")
 		err = syscall.Setuid(uid)
 		if err != nil {
 			panic("setuid failed")
@@ -215,6 +235,7 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	// TODO: Add the ability to trim environment and/or add to environment (kinda) like sudo does
 	args := []string{shell}
 	env := os.Environ()
+	fmt.Println("In child, execing shell")
 	execErr := syscall.Exec(shell, args, env)
 	if execErr != nil {
 		panic(execErr)
