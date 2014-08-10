@@ -35,9 +35,7 @@ func dockersha(name string) (sha string, err error) {
 	if err != nil {
 		return sha, errors.New(err.Error() + ":\n" + string(output))
 	}
-
-	sha = strings.TrimSpace(string(sha))
-
+	sha = strings.TrimSpace(string(output))
 	if sha == "" {
 		return "", errors.New("Invalid SHA")
 	}

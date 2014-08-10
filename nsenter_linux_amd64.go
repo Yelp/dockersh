@@ -47,7 +47,7 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	}
 	sha, err := dockersha(containerName)
 	if err != nil {
-		panic(fmt.Sprintf("Could not get SHA for container: %s", containerName))
+		panic(fmt.Sprintf("Could not get SHA for container: %s %s", err.Error(), containerName))
 	}
 	containerConfigLocation := fmt.Sprintf("/var/lib/docker/execdriver/native/%s/container.json", sha)
 	_, err = loadContainer(containerConfigLocation)
