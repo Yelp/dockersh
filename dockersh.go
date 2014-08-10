@@ -51,15 +51,15 @@ func realMain() int {
 	realUserCwd := tmplConfigVar(config.UserCwd, &configInterpolations)
 	realContainerName := tmplConfigVar(config.ContainerName, &configInterpolations)
 
-	pid, err := dockerpid(realContainerName)
+	_, err = dockerpid(realContainerName)
 	if err != nil {
-		pid, err = dockerstart(realUsername, realHomedirFrom, realHomedirTo, realContainerName, realImageName, config.DockerSocket, config.MountHome, config.MountTmp, config.MountDockerSocket, config.Entrypoint, config.Cmd, config.DockerOpt)
+		_, err = dockerstart(realUsername, realHomedirFrom, realHomedirTo, realContainerName, realImageName, config.DockerSocket, config.MountHome, config.MountTmp, config.MountDockerSocket, config.Entrypoint, config.Cmd, config.DockerOpt)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
 		}
 	}
-	err = nsenterexec(pid, uid, gid, realUserCwd, realShell)
+	err = nsenterexec(realContainerName, uid, gid, realUserCwd, realShell)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v\n", err)
 		return 1

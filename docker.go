@@ -29,6 +29,21 @@ func dockerpid(name string) (pid int, err error) {
 	return pid, nil
 }
 
+func dockersha(name string) (sha string, err error) {
+	cmd := exec.Command("docker", "inspect", "--format", "{{.Id}}", name)
+	output, err := cmd.Output()
+	if err != nil {
+		return sha, errors.New(err.Error() + ":\n" + string(output))
+	}
+
+	sha = strings.TrimSpace(string(sha))
+
+	if sha == "" {
+		return "", errors.New("Invalid SHA")
+	}
+	return sha, nil
+}
+
 func dockerstart(username string, homedirfrom string, homedirto string, name string, container string, dockersock string, bindhome bool, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()

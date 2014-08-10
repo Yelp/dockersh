@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
+	"github.com/docker/libcontainer"
 	"github.com/docker/libcontainer/security/capabilities"
 	"os"
 	"path"
@@ -23,7 +25,33 @@ const (
 	SIGCHLD     = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
 )
 
-func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error) {
+func loadContainer(path string) (*libcontainer.Config, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var container *libcontainer.Config
+	if err := json.NewDecoder(f).Decode(&container); err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
+
+func nsenterexec(containerName string, uid int, gid int, wd string, shell string) (err error) {
+	pid, err := dockerpid(containerName)
+	if err != nil {
+		panic(fmt.Sprintf("Could not get PID for container: %s", containerName))
+	}
+	sha, err := dockersha(containerName)
+	if err != nil {
+		panic(fmt.Sprintf("Could not get SHA for container: %s", containerName))
+	}
+	containerConfigLocation := fmt.Sprintf("/var/lib/docker/execdriver/native/%s/container.json", sha)
+	_, err = loadContainer(containerConfigLocation)
+
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
 	if rooterr != nil {
 		panic(fmt.Sprintf("Could not open fd to root: %s", rooterr))
