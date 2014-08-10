@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
-	"github.com/docker/libcontainer"
-	"github.com/docker/libcontainer/cgroups/fs"
 	"github.com/docker/libcontainer/security/capabilities"
 	"os"
 	"path"
@@ -26,19 +23,56 @@ const (
 	SIGCHLD     = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
 )
 
-func loadContainer(path string) (*libcontainer.Config, error) {
-	f, err := os.Open(path)
+var cGroups = []string{ // FIXME - We should discover this dynamically
+	"blkio",
+	"cpuacct",
+	"cpu",
+	"devices",
+	"freezer",
+	"memory",
+	"perf_event",
+}
+
+func addProcessToCgroupsForContainer(containerSha string, pid int) (err error) {
+	for _, element := range cGroups {
+		fmt.Println("Working for cgroup", element)
+		err = addProcessToCgroupForContainer(containerSha, element, pid)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func addProcessToCgroupForContainer(containerSha string, group string, pid int) (err error) {
+	path := fmt.Sprintf("/sys/fs/cgroup/%s/docker/%s/tasks", group, containerSha)
+	f, err := os.Create(path)
 	if err != nil {
-		return nil, err
+		panic(fmt.Sprintf("Could not open %s: %s", path, err.Error()))
 	}
-	defer f.Close()
-
-	var container *libcontainer.Config
-	if err := json.NewDecoder(f).Decode(&container); err != nil {
-		return nil, err
+	_, err = f.WriteString(fmt.Sprintf("%s\n", strconv.Itoa(pid)))
+	if err != nil {
+		panic("Could not write PID")
 	}
+	f.Close()
+	return nil
+}
 
-	return container, nil
+func doChrootChwd(rootfd *os.File, cwdfd *os.File) (err error) {
+	_, _, echrootdir := syscall.Syscall(syscall.SYS_FCHDIR, rootfd.Fd(), 0, 0)
+	if echrootdir != 0 {
+		panic("chdir to new root failed")
+	}
+	chrooterr := syscall.Chroot(".")
+	if chrooterr != nil {
+		panic(fmt.Sprintf("chroot failed: %s", chrooterr))
+	}
+	// FIXME - this cwds to the cwd of the 'root' process inside the container, we probably want to cwd to user's homedir instead?
+	_, _, ecwd := syscall.Syscall(syscall.SYS_FCHDIR, cwdfd.Fd(), 0, 0)
+	if ecwd != 0 {
+		panic("cwd to working directory failed")
+	}
+	return nil
 }
 
 func nsenterexec(containerName string, uid int, gid int, wd string, shell string) (err error) {
@@ -46,14 +80,9 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	if err != nil {
 		panic(fmt.Sprintf("Could not get PID for container: %s", containerName))
 	}
-	sha, err := dockersha(containerName)
+	containerSha, err := dockersha(containerName)
 	if err != nil {
 		panic(fmt.Sprintf("Could not get SHA for container: %s %s", err.Error(), containerName))
-	}
-	containerConfigLocation := fmt.Sprintf("/var/lib/docker/execdriver/native/%s/container.json", sha)
-	container, err := loadContainer(containerConfigLocation)
-	if err != nil {
-		panic(fmt.Sprintf("Could not load container configuration: %v", err))
 	}
 
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
@@ -113,20 +142,6 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	namespace.Setns(pidfd, namespace.CLONE_NEWPID)
 	namespace.Setns(mountfd, namespace.CLONE_NEWNS)
 
-	_, _, echrootdir := syscall.Syscall(syscall.SYS_FCHDIR, rootfd.Fd(), 0, 0)
-	if echrootdir != 0 {
-		panic("chdir to new root failed")
-	}
-	chrooterr := syscall.Chroot(".")
-	if chrooterr != nil {
-		panic(fmt.Sprintf("chroot failed: %s", chrooterr))
-	}
-	// FIXME - this cwds to the cwd of the 'root' process inside the container, we probably want to cwd to user's homedir instead?
-	_, _, ecwd := syscall.Syscall(syscall.SYS_FCHDIR, cwdfd.Fd(), 0, 0)
-	if ecwd != 0 {
-		panic("cwd to working directory failed")
-	}
-
 	namespace.Close(ipcfd)
 	namespace.Close(utsfd)
 	namespace.Close(netfd)
@@ -162,18 +177,11 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 			panic(procerr)
 		}
 		fmt.Println("Setting up Cgroups from parent")
-		// FIXME - We exec the new shell before we apply these Cgroups, race condition!
-		cleaner, err := fs.Apply(container.Cgroups, proc.Pid)
-		if err != nil {
-			fmt.Println("Could not setup cgroups: %s", err.Error())
-			proc.Kill()
-			proc.Wait()
-			return err
-		}
-		if cleaner != nil {
-			defer cleaner.Cleanup()
-		}
-		fmt.Println("Setting up Cgroups in child")
+
+		// FIXME Race condition
+		err = addProcessToCgroupsForContainer(containerSha, proc.Pid)
+
+		doChrootChwd(rootfd, cwdfd)
 
 		_, _ = proc.Wait()
 		// FIXME: Deal with SIGSTOP on the child in the same way nsenter does?
@@ -186,6 +194,8 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	}
 
 	// We're definitely in the child process by the time we get here.
+	doChrootChwd(rootfd, cwdfd)
+
 	fmt.Println("In child, dropping caps")
 	// Drop capabilities except those in the whitelist, from https://github.com/docker/docker/blob/master/daemon/execdriver/native/template/default_template.go
 	cape := capabilities.DropBoundingSet([]string{
