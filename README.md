@@ -31,8 +31,7 @@ processes and networking.
 
 This means that the user is isolated from the rest of the system, and they can only see their own processes,
 and have their own network stack. This gives better privacy between users, and can also be used for more easily
-seperating each user's processes from the rest of the system with per user constraints (e.g. memory limit all of
-the user's processes, or to limit their aggregate bandwidth etc)
+seperating each user's processes from the rest of the system with per user constraints.
 
 
 Normally to give users individual containers you have to run an ssh daemon in each
@@ -194,11 +193,6 @@ A very restricted environment, with only the busybox container, limited to 32M o
     imagename = busybox
     shell = /bin/ash
     usercwd = /
-    dockeropt = -m
-    dockeropt = 32m
-
-*NOTE*: For setting memory limits on docker containers, you have to enable the following kernel parameters: ``cgroup_enable=memory swapaccount=1``,
-and these have a non-trivial overhead!
 
 A fairly restricted shell environment, but with homedirectories and one admin user being allowed additional privs, set the following ``/etc/dockersh``
 
@@ -240,6 +234,8 @@ Or just allowing your users to run whatever container they want:
 TODO
 ====
 
+ * Setup the newly spawned process to have cgroups as per the container process (this doesn't currently happen)
+   * This enables / fixes memory limiting per user container
  * How do we deal with changed settings (i.e. when to recycle the container)
     * Document just kill 1 inside the container?
  * Fix up go panics when exiting the root container.
