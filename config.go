@@ -34,8 +34,8 @@ type Configuration struct {
 	EnableUserDockerSocket      bool
 	Entrypoint                  string
 	EnableUserEntrypoint        bool
-	Cmd			    []string
-	EnableUserCmd		    bool
+	Cmd                         []string
+	EnableUserCmd               bool
 }
 
 func (c Configuration) Dump() string {
@@ -136,6 +136,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	}
 	if (!blacklist || old.EnableUserContainerName) && new.ContainerName != "" {
 		old.ContainerName = new.ContainerName
+	}
+	if (!blacklist || old.EnableUserCmd) && len(new.Cmd) > 0 {
+		old.Cmd = new.Cmd
 	}
 	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true
