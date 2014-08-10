@@ -11,12 +11,14 @@ import (
 type Configuration struct {
 	ImageName                   string
 	EnableUserImageName         bool
+	ContainerName               string
+	EnableUserContainerName     bool
 	MountHomeFrom               string
 	EnableUserMountHomeFrom     bool
 	MountHomeTo                 string
 	EnableUserMountHomeTo       bool
-	UserCwd			    string
-	EnableUserUserCwd	    bool
+	UserCwd                     string
+	EnableUserUserCwd           bool
 	ContainerUsername           string
 	EnableUserContainerUsername bool
 	Shell                       string
@@ -45,6 +47,7 @@ type configInterpolation struct {
 
 var defaultConfig = Configuration{
 	ImageName:         "busybox",
+	ContainerName:     "%u_dockersh",
 	MountHomeFrom:     "%h",
 	MountHomeTo:       "%h",
 	UserCwd:           "%h",
@@ -128,6 +131,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	}
 	if (!blacklist || old.EnableUserUserCwd) && new.UserCwd != "" {
 		old.UserCwd = new.UserCwd
+	}
+	if (!blacklist || old.EnableUserContainerName) && new.ContainerName != "" {
+		old.ContainerName = new.ContainerName
 	}
 	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true

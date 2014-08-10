@@ -135,21 +135,26 @@ The global config file, ``/etc/dockershrc`` has a ``[dockersh]`` block in it, an
 This can be used to set settings globally or per user, and also to enable the setting
 of settings in the (optional) per user configuration file (``~/.dockersh``), if enabled.
 
+Config file values
+------------------
+
 Setting name  | Type | Description | Default value | Example value
 ------------- | ---- | ----------- | ------------- | -------------
 imagename  | String | The name of the container image to launch for the user. The %u sequence will interpolate the username | busybox | ubuntu, or %u/mydockersh
+containername | String | The name of the container (per user) which is launched. | %u_dockersh | %u-dsh
 mounthome | Bool | If the users home directory should be mounted in the target container | false | true
 mounttmp | Bool | If /tmp should be mounted into the target container (so that ssh agent forwarding works). N.B. Security risk | false | true
-mounthometo | String | Where to map the user's home directory inside the container. | $HOME (from /etc/passwd) | /opt/home/myhomedir
-mounthomefrom | String | Where to map the user's home directory from on the host. | $HOME (from /etc/passwd) | /opt/home/%u
-usercwd | String | Where to chdir into the container when starting a shell. | $HOME (from /etc/passwd) | /
-containerusername | String | Username which should be used inside the container. Defaults to %u (which is interpolated) | %u | root
+mounthometo | String | Where to map the user's home directory inside the container. | %h | /opt/home/myhomedir
+mounthomefrom | String | Where to map the user's home directory from on the host. | %h | /opt/home/%u
+usercwd | String | Where to chdir into the container when starting a shell. | %h | /
+containerusername | String | Username which should be used inside the container. | %u | root
 shell | String | The shell that should be started for the user inside the container. | /bin/ash | /bin/bash
 mountdockersocket | Bool | If to mount the docker socket from the host. (DANGEROUS) | false | true
 dockersocket | String | The location of the docker socket from the host. | /var/run/docker.sock | /opt/docker/var/run/docker.sock
 entrypoint | String | The entrypoint for the persistent process to keep the container running | internal | /sbin/yoursupervisor
 enableuserconfig | Bool | Set to true to enable reading of per user ``~/.dockersh`` files | false | true
 enableuserimagename | Bool | Set to true to enable reading of imagename parameter from ``~/.dockersh`` files | false | true
+enableusercontainername | Bool | Set to true to enable reading of containername parameter from ``~/.dockersh`` files. (Dangerous!) | false | true
 enableusermounthome | Bool | Set to true to enable reading of mounthome parameter from ``~/.dockersh`` files | false | true
 enableusermounttmp | Bool | Set to true to enable reading of mounttmp parameter from ``~/.dockersh`` files | false | true
 enableusermounthometo | Bool | Set to true to enable reading of mounthometo parameter from ``~/.dockersh`` files | false | true
@@ -164,6 +169,16 @@ Notes:
   * Boolean settings are set by just putting the setting name in the config (see examples below).
   * You must set both ``enableuserconfig`` and the specific ``enableuserxxx`` setting that you want in ``/etc/dockersh`` to
     get any values parsed from ``~/.dockersh``
+
+Config interpolations
+---------------------
+
+The following sequences are interpolated if found in configuration variables:
+
+Sequence | Interpolation
+---------|--------------
+%u | The username of the user running dockersh
+%h | The homedirectory (from /etc/passwd) of the user running dockersh
 
 Example configs
 ---------------
