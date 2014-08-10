@@ -35,7 +35,6 @@ var cGroups = []string{ // FIXME - We should discover this dynamically
 
 func addProcessToCgroupsForContainer(containerSha string, pid int) (err error) {
 	for _, element := range cGroups {
-		fmt.Println("Working for cgroup", element)
 		err = addProcessToCgroupForContainer(containerSha, element, pid)
 		if err != nil {
 			return err
@@ -176,8 +175,6 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 			fmt.Fprintf(os.Stderr, "Failed waiting for child: %s\n", strconv.Itoa(int(r1)))
 			panic(procerr)
 		}
-		fmt.Println("Setting up Cgroups from parent")
-
 		// FIXME Race condition
 		err = addProcessToCgroupsForContainer(containerSha, proc.Pid)
 
@@ -196,7 +193,6 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	// We're definitely in the child process by the time we get here.
 	doChrootChwd(rootfd, cwdfd)
 
-	fmt.Println("In child, dropping caps")
 	// Drop capabilities except those in the whitelist, from https://github.com/docker/docker/blob/master/daemon/execdriver/native/template/default_template.go
 	cape := capabilities.DropBoundingSet([]string{
 		"CHOWN",
@@ -221,7 +217,6 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	// Drop groups, set to the primary group of the user.
 	// TODO: Add user's other groups from /etc/group?
 	if gid > 0 {
-		fmt.Println("In child, dropping groups")
 		err = syscall.Setgroups([]int{}) // drop supplementary groups
 		if err != nil {
 			panic("setgroups failed")
@@ -233,7 +228,6 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	}
 	// Change uid from root down to the actual user
 	if uid > 0 {
-		fmt.Println("In child, dropping uid")
 		err = syscall.Setuid(uid)
 		if err != nil {
 			panic("setuid failed")
@@ -245,7 +239,6 @@ func nsenterexec(containerName string, uid int, gid int, wd string, shell string
 	// TODO: Add the ability to trim environment and/or add to environment (kinda) like sudo does
 	args := []string{shell}
 	env := os.Environ()
-	fmt.Println("In child, execing shell")
 	execErr := syscall.Exec(shell, args, env)
 	if execErr != nil {
 		panic(execErr)
