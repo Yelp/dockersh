@@ -31,13 +31,13 @@ func loadContainer(path string) (*libcontainer.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
 
 	var container *libcontainer.Config
 	if err := json.NewDecoder(f).Decode(&container); err != nil {
+		f.Close()
 		return nil, err
 	}
-
+	f.Close()
 	return container, nil
 }
 
@@ -58,6 +58,10 @@ func doChrootChwd(rootfd *os.File, cwdfd *os.File) (err error) {
 	return nil
 }
 
+func openNamespaceFd(pid int, path string) (*os.File, error) {
+	return os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), path))
+}
+
 func nsenterexec(containerName string, uid int, gid int, groups []int, wd string, shell string) (err error) {
 	pid, err := dockerpid(containerName)
 	if err != nil {
@@ -73,23 +77,19 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		panic(fmt.Sprintf("Could not load container configuration: %v", err))
 	}
 
-	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
-	if rooterr != nil {
-		panic(fmt.Sprintf("Could not open fd to root: %s", rooterr))
+	rootfd, err := openNamespaceFd(pid, "")
+	if err != nil {
+		panic(fmt.Sprintf("Could not open fd to root: %s", err))
 	}
-	// Find the user's homw directory (which should be bound in as a volume) in the
-	// container process namespace, so we can chdir there later.
-	cwdfd, cwderr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), wd))
-	if cwderr != nil {
-		return errors.New(fmt.Sprintf("Could not open fd to desired cwd: %s", wd))
-	}
+	cwdfd, err := openNamespaceFd(pid, wd)
 	if strings.HasPrefix(shell, "/") != true {
 		return errors.New(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
 	}
 	shell = path.Clean(shell)
-	_, shellerr := os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), shell))
-	if shellerr != nil {
-		return errors.New(fmt.Sprintf("Cannot find ynur shell %s inside your container", shell))
+	shellfd, err := openNamespaceFd(pid, shell)
+	shellfd.Close()
+	if err != nil {
+		return errors.New(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
 	}
 
 	/* FIXME: Make these an array and loop through them, as this is gross */
@@ -165,9 +165,14 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 			panic(procerr)
 		}
 		// FIXME Race condition
-		_, err = namespaces.SetupCgroups(container, proc.Pid)
+		cleaner, err := namespaces.SetupCgroups(container, proc.Pid)
 		if err != nil {
+			proc.Kill()
+			proc.Wait()
 			panic(fmt.Sprintf("SetupCgroups failed: %s", err.Error()))
+		}
+		if cleaner != nil {
+			defer cleaner.Cleanup()
 		}
 
 		doChrootChwd(rootfd, cwdfd)
