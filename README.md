@@ -197,6 +197,9 @@ A very restricted environment, with only the busybox container, limited to 32M o
     dockeropt = -m
     dockeropt = 32m
 
+*NOTE*: For setting memory limits on docker containers, you have to enable the following kernel parameters: ``cgroup_enable=memory swapaccount=1``,
+and these have a non-trivial overhead!
+
 A fairly restricted shell environment, but with homedirectories and one admin user being allowed additional privs, set the following ``/etc/dockersh``
 
     [dockersh]
