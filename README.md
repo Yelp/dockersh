@@ -188,12 +188,14 @@ Sequence | Interpolation
 Example configs
 ---------------
 
-A very restricted environment, with only the busybox container, ``/etc/dockersh`` looks like this:
+A very restricted environment, with only the busybox container, limited to 32M of memory, ``/etc/dockersh`` looks like this:
 
     [dockersh]
     imagename = busybox
     shell = /bin/ash
     usercwd = /
+    dockeropt = -m
+    dockeropt = 32m
 
 A fairly restricted shell environment, but with homedirectories and one admin user being allowed additional privs, set the following ``/etc/dockersh``
 
