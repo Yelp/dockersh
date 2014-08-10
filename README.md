@@ -231,6 +231,13 @@ Or just allowing your users to run whatever container they want:
     enableuserconfig
     enableuserimagename
 
+Caveats
+=======
+
+  * User namespaces are not supported (yet) so if users escalate to root inside the container, they can probably escape
+  * cgroups from the container root process are not applied to shells - this makes memory or CPU limits applied via docker not take effect.
+  * This code *has not* been audited by a 3rd party or a container expert, there are probably issues waiting to be found!
+
 TODO
 ====
 
