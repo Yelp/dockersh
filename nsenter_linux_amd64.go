@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/coreos/go-namespaces/namespace"
-	"github.com/docker/libcontainer/security/capabilities"
+	"github.com/docker/libcontainer"
 	"github.com/docker/libcontainer/namespaces"
+	"github.com/docker/libcontainer/security/capabilities"
 	"os"
 	"path"
 	"strconv"
@@ -23,6 +25,21 @@ const (
 	CLONE_VFORK = 0x00004000 /* set if the parent wants the child to wake it up on mm_release */
 	SIGCHLD     = 0x14       /* Should set SIGCHLD for fork()-like behavior on Linux */
 )
+
+func loadContainer(path string) (*libcontainer.Config, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var container *libcontainer.Config
+	if err := json.NewDecoder(f).Decode(&container); err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
 
 func doChrootChwd(rootfd *os.File, cwdfd *os.File) (err error) {
 	_, _, echrootdir := syscall.Syscall(syscall.SYS_FCHDIR, rootfd.Fd(), 0, 0)
@@ -51,10 +68,10 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		panic(fmt.Sprintf("Could not get SHA for container: %s %s", err.Error(), containerName))
 	}
 	containerConfigLocation := fmt.Sprintf("/var/lib/docker/execdriver/native/%s/container.json", containerSha)
-      container, err := loadContainer(containerConfigLocation)
-       if err != nil {
-               panic(fmt.Sprintf("Could not load container configuration: %v", err))
-       }
+	container, err := loadContainer(containerConfigLocation)
+	if err != nil {
+		panic(fmt.Sprintf("Could not load container configuration: %v", err))
+	}
 
 	rootfd, rooterr := os.Open(fmt.Sprintf("/proc/%s/root", strconv.Itoa(pid)))
 	if rooterr != nil {
