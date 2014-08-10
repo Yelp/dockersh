@@ -235,14 +235,12 @@ Caveats
 =======
 
   * User namespaces are not supported (yet) so if users escalate to root inside the container, they can probably escape
-  * cgroups from the container root process are not applied to shells - this makes memory or CPU limits applied via docker not take effect.
+  * Tty/Pty handling is not great - whilst things appear to work, they don't go well in unusual circumstances (e.g. your process being killed due to OOM).
   * This code *has not* been audited by a 3rd party or a container expert, there are probably issues waiting to be found!
 
 TODO
 ====
 
- * Setup the newly spawned process to have cgroups as per the container process (this doesn't currently happen)
-   * This enables / fixes memory limiting per user container
  * How do we deal with changed settings (i.e. when to recycle the container)
     * Document just kill 1 inside the container?
  * Fix up go panics when exiting the root container.
