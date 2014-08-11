@@ -23,8 +23,11 @@ func nsenterdetect() (found bool, err error) {
 	fmt.Fprintf(os.Stderr, "cound not detect if nsenter was installed: %s\n", err)
 	return false, err
 }
-
-func nsenterexec(pid int, uid int, gid int, wd string, shell string) (err error) {
+func nsenterexec(containerName string, uid int, gid int, gids []int, wd string, shell string) (err error) {
+	pid, err := dockerpid(containerName)
+	if err != nil {
+		panic(fmt.Sprintf("Could not get PID for container: %s", containerName))
+	}
 	// sudo nsenter --target "$PID" --mount --uts --ipc --net --pid --setuid $DESIRED_UID --setgid $DESIRED_GID --wd=$HOMEDIR -- "$REAL_SHELL"
 	cmd := exec.Command("boot2docker", "ssh", "-t", "sudo", "/var/lib/boot2docker/nsenter",
 		"--target", strconv.Itoa(pid), "--mount", "--uts", "--ipc", "--net", "--pid",
