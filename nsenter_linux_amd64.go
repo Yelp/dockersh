@@ -92,51 +92,15 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		return errors.New(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
 	}
 
-	/* FIXME: Make these an array and loop through them, as this is gross */
-
-	/* --ipc */
-	ipcfd, ipcerr := namespace.OpenProcess(pid, namespace.CLONE_NEWIPC)
-	if ipcfd == 0 || ipcerr != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWIPC)")
+	var nslist = []uintptr{namespace.CLONE_NEWIPC, namespace.CLONE_NEWUTS, namespace.CLONE_NEWNET, namespace.CLONE_NEWPID, namespace.CLONE_NEWNS}
+	for _, ns := range nslist {
+		nsfd, err := namespace.OpenProcess(pid, ns)
+		if nsfd == 0 || err != nil {
+			panic("namespace.OpenProcess(pid, xxx)")
+		}
+		namespace.Setns(nsfd, ns)
+		namespace.Close(nsfd)
 	}
-
-	/* --uts */
-	utsfd, utserr := namespace.OpenProcess(pid, namespace.CLONE_NEWUTS)
-	if utsfd == 0 || utserr != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWUTS)")
-	}
-
-	/* --net */
-	netfd, neterr := namespace.OpenProcess(pid, namespace.CLONE_NEWNET)
-	if netfd == 0 || neterr != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWNET)")
-	}
-
-	/* --pid */
-	pidfd, piderr := namespace.OpenProcess(pid, namespace.CLONE_NEWPID)
-	if pidfd == 0 || piderr != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWPID)")
-	}
-
-	/* --mount */
-	mountfd, mounterr := namespace.OpenProcess(pid, namespace.CLONE_NEWNS)
-	if mountfd == 0 || mounterr != nil {
-		panic("namespace.OpenProcess(pid, namespace.CLONE_NEWNS)")
-	}
-
-	namespace.Setns(ipcfd, namespace.CLONE_NEWIPC)
-	namespace.Setns(utsfd, namespace.CLONE_NEWUTS)
-	namespace.Setns(netfd, namespace.CLONE_NEWNET)
-	namespace.Setns(pidfd, namespace.CLONE_NEWPID)
-	namespace.Setns(mountfd, namespace.CLONE_NEWNS)
-
-	namespace.Close(ipcfd)
-	namespace.Close(utsfd)
-	namespace.Close(netfd)
-	namespace.Close(pidfd)
-	namespace.Close(mountfd)
-
-	/* END FIXME */
 
 	// see go/src/pkg/syscall/exec_unix.go - not sure if this is needed or not (or if we should lock a larger section)
 	syscall.ForkLock.Lock()
