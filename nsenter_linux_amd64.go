@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	//"github.com/coreos/go-namespaces/namespace"
+	"github.com/coreos/go-namespaces/namespace"
 	"github.com/docker/libcontainer"
-	"github.com/docker/libcontainer/forkexec"
 	"github.com/docker/libcontainer/namespaces"
 	"github.com/docker/libcontainer/security/capabilities"
 	"os"
@@ -100,35 +99,19 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 	if err != nil {
 		return errors.New(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
 	}
-	/*
-		var nslist = []uintptr{namespace.CLONE_NEWIPC, namespace.CLONE_NEWUTS, namespace.CLONE_NEWNET, namespace.CLONE_NEWPID, namespace.CLONE_NEWNS}
-		for _, ns := range nslist {
-			nsfd, err := namespace.OpenProcess(containerpid, ns)
-			if nsfd == 0 || err != nil {
-				panic("namespace.OpenProcess(containerpid, xxx)")
-			}
-			namespace.Setns(nsfd, ns)
-			namespace.Close(nsfd)
+
+	var nslist = []uintptr{namespace.CLONE_NEWIPC, namespace.CLONE_NEWUTS, namespace.CLONE_NEWNET, namespace.CLONE_NEWPID, namespace.CLONE_NEWNS}
+	for _, ns := range nslist {
+		nsfd, err := namespace.OpenProcess(containerpid, ns)
+		if nsfd == 0 || err != nil {
+			panic("namespace.OpenProcess(containerpid, xxx)")
 		}
-		dropCaps()*/
-	fmt.Println("Dropped caps, ForkExecNew now")
-	uidMappings := []forkexec.IdMap{
-		{
-			ContainerId: 0,
-			HostId:      1000,
-			Size:        1,
-		},
+		namespace.Setns(nsfd, ns)
+		namespace.Close(nsfd)
 	}
+	dropCaps()
 
-	gidMappings := []forkexec.IdMap{
-		{
-			ContainerId: 0,
-			HostId:      1000,
-			Size:        1,
-		},
-	}
-
-	pid, err := forkexec.ForkExecNew(shell, []string{"sh"}, &ProcAttr{
+	pid, err := ForkExec(shell, []string{"sh"}, &ProcAttr{
 		//Env:
 		Dir: wd,
 		//sys.Setsid
@@ -137,14 +120,12 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
 		Sys: &SysProcAttr{
 			Chroot:     fmt.Sprintf("/proc/%s/root", strconv.Itoa(containerpid)),
-			Cloneflags: CLONE_VFORK,
 			Credential: &Credential{Uid: uint32(uid), Gid: uint32(gid)}, //, Groups: []uint32(groups)},
 		},
-	}, uidMappings, gidMappings)
+	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Forked, in parent")
 	proc, err := os.FindProcess(pid)
 	if err != nil {
 		panic(fmt.Sprintf("Could not get proc for pid %s", strconv.Itoa(pid)))
@@ -159,7 +140,6 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 	if cleaner != nil {
 		defer cleaner.Cleanup()
 	}
-	fmt.Println("about to wait")
 	var wstatus WaitStatus
 	_, err1 := Wait4(pid, &wstatus, 0, nil)
 	if err != nil {
