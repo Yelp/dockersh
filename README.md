@@ -234,7 +234,6 @@ TODO
  * Fix up go panics when exiting the root container.
  * getpwnam so that we can interpolate the user's shell from /etc/shells (if used in ForceCommand mode!)
  * Decent test cases
- * Make the darwin nsenter version less crazy - or kill as less features?
  * Use libcontainer a lot more, in favour of our code:
     * https://github.com/docker/libcontainer/pull/143 - better nsenter with cgroups
     * https://github.com/docker/libcontainer/pull/150 - better forkexec
