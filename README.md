@@ -64,24 +64,11 @@ kernel namespaces, so any security issues in this code are likely to be exploita
 Requirements
 ============
 
-amd64 platforms
----------------
+Linux >= 3.8
 
-Compiles down into a single binary with no external dependencies - see 'Installation' below.
+Docker >= 1.0.0
 
-darwin
-------
-
-dockersh tries to support Mac environments e.g. [boot2docker](http://boot2docker.io/) (however at this time the solution is less
-optimum and less secure).
-
-dockersh requires a patched version of the 'nsenter' utility on the target machine *if* you want to
-use it from darwin (E.g. in boot2docker). This version of nsenter needs to be installed inside the
-boot2docker VM.
-
-It is recommended that
-you remove any version of nsenter you have installed currently, then invoke dockersh, which will
-tell you how to install the patched version.
+If you want to build it locally (rather than in a docker container), Go >= 1.2
 
 Installation
 ============
@@ -90,6 +77,7 @@ With docker
 -----------
 
 (This is the recommended method).
+
 Build the Dockerfile in the local directory into an image, and run it like this:
 
     $ docker build .
