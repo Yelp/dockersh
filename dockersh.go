@@ -28,11 +28,6 @@ func tmplConfigVar(template string, v *configInterpolation) string {
 }
 
 func realMain() int {
-	_, err := nsenterdetect()
-	if err != nil {
-		return 1
-	}
-	/* Woo! We found nsenter, now to move onto more interesting things */
 	username, homedir, uid, gid, err := getCurrentUser()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not get current user: %v", err)

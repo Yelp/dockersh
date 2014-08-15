@@ -16,11 +16,6 @@ import (
 	. "syscall"
 )
 
-func nsenterdetect() (found bool, err error) {
-	// We've inlined the subset of nsenter code we need for amd64 :)
-	return true, nil
-}
-
 func loadContainer(path string) (*libcontainer.Config, error) {
 	f, err := os.Open(path)
 	if err != nil {
