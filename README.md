@@ -24,7 +24,7 @@ Why do I want this?
 
 You want to allow multiple users to ssh onto a single box, but you'd like some isolation
 between those users. With dockersh each user enters their
-own individual docker container (acting like a lightweight VM), with their home directory mounted from the host
+own individual docker container (acting like a lightweight virtual machine), with their home directory mounted from the host
 system (so that user data is persistent between container restarts), but with it's own kernel namespaces for
 processes and networking.
 
