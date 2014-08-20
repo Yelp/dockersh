@@ -1,4 +1,4 @@
-![Build status](https://travis-ci.org/Yelp/dockersh.svg)
+![Build status](https://travis-ci.org/Yelp/dockersh.svg) [Dockerhub container](https://registry.hub.docker.com/u/yelp/dockersh/)
 
 dockersh
 ========
