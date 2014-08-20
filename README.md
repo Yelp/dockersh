@@ -89,7 +89,7 @@ Build the Dockerfile in the local directory into an image, and run it like this:
 Without docker
 --------------
 
-You need to install golang (tested on >= 1.3), then you should just be able to run:
+You need to install golang (tested on 1.2 and 1.3), then you should just be able to run:
 
     go get
     make
