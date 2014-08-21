@@ -49,14 +49,14 @@ containers.
 SECURITY WARNING
 ================
 
-dockersh tries hard to drop all priviliges as soon as possible, including disabling 
+dockersh tries hard to drop all privileges as soon as possible, including disabling 
 the suid, sgid, raw sockets and mknod capabilities of the target process (and all children),
 however this doesn't mean that it is safe enough to allow public access to dockersh containers!
 
 *WARNING:* Whilst this project tries to make users inside containers have lowered privileges
 and drops capabilities to limit users ability to escalate their privilege level, it is not certain
 to be completely secure. Notably when Docker adds user namespace support, this can be used
-to further lock down privilidges.
+to further lock down privileges.
 
 *SECOND WARNING:* The dockersh binary needs the suid bit set so that it can make the syscalls to adjust
 kernel namespaces, so any security issues in this code are likely to be exploitable to root.
