@@ -2,18 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/coreos/go-namespaces/namespace"
-	"github.com/docker/libcontainer"
-	"github.com/docker/libcontainer/namespaces"
-	"github.com/docker/libcontainer/security/capabilities"
 	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	. "syscall"
+
+	"github.com/coreos/go-namespaces/namespace"
+	"github.com/docker/libcontainer"
+	"github.com/docker/libcontainer/namespaces"
+	"github.com/docker/libcontainer/security/capabilities"
 )
 
 func loadContainer(path string) (*libcontainer.Config, error) {
@@ -87,13 +87,13 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 	cwdfd.Close()
 
 	if strings.HasPrefix(shell, "/") != true {
-		return errors.New(fmt.Sprintf("Shell '%s' does not start with /, need an absolute path", shell))
+		return fmt.Errorf("Shell '%s' does not start with /, need an absolute path", shell)
 	}
 	shell = path.Clean(shell)
 	shellfd, err := openNamespaceFd(containerpid, shell)
 	shellfd.Close()
 	if err != nil {
-		return errors.New(fmt.Sprintf("Cannot find your shell %s inside your container", shell))
+		return fmt.Errorf("Cannot find your shell %s inside your container", shell)
 	}
 
 	var nslist = []uintptr{namespace.CLONE_NEWIPC, namespace.CLONE_NEWUTS, namespace.CLONE_NEWNET, namespace.CLONE_NEWPID, namespace.CLONE_NEWNS} // namespace.CLONE_NEWUSER
@@ -137,7 +137,7 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		defer cleaner.Cleanup()
 	}
 
-	// err = writeUserMappings(pid, []IdMap{{ContainerId: 0, HostId: uint32(uid)}}, []IdMap{{ContainerId: 0, HostId: uint32(gid)}})
+	// err = writeUserMappings(pid, []IDMap{{ContainerID: 0, HostID: uint32(uid)}}, []IDMap{{ContainerID: 0, HostID: uint32(gid)}})
 	// if err != nil
 
 	var wstatus WaitStatus
@@ -150,26 +150,26 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 }
 
 // Stolen from https://raw.githubusercontent.com/mrunalp/libcontainer/152f2faa63f6db55417e84bb4eb52671de820815/forkexec/forkexec.go
-type IdMap struct {
-	ContainerId uint32
-	HostId      uint32
+type IDMap struct {
+	ContainerID uint32
+	HostID      uint32
 	Size        uint32
 }
 
 // Write UID/GID mappings for a process.
-func writeUserMappings(pid int, uidMappings, gidMappings []IdMap) error {
+func writeUserMappings(pid int, uidMappings, gidMappings []IDMap) error {
 	if len(uidMappings) > 5 || len(gidMappings) > 5 {
 		return fmt.Errorf("Only 5 uid/gid mappings are supported by the kernel")
 	}
 
 	uidMapStr := make([]string, len(uidMappings))
 	for i, um := range uidMappings {
-		uidMapStr[i] = fmt.Sprintf("%v %v %v", um.ContainerId, um.HostId, um.Size)
+		uidMapStr[i] = fmt.Sprintf("%v %v %v", um.ContainerID, um.HostID, um.Size)
 	}
 
 	gidMapStr := make([]string, len(gidMappings))
 	for i, gm := range gidMappings {
-		gidMapStr[i] = fmt.Sprintf("%v %v %v", gm.ContainerId, gm.HostId, gm.Size)
+		gidMapStr[i] = fmt.Sprintf("%v %v %v", gm.ContainerID, gm.HostID, gm.Size)
 	}
 
 	uidMap := []byte(strings.Join(uidMapStr, "\n"))
