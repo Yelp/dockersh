@@ -17,7 +17,7 @@ dockersh can be used as a shell in ``/etc/passwd`` or as an ssh ``ForceCommand``
 
 
 This allows you to have a single ssh process on the normal ssh port which places user
-sessions into their own individual docker containers in a secure and locked down manor.
+sessions into their own individual docker containers in a secure and locked down manner.
 
 Why do I want this?
 ===================
