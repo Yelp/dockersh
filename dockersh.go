@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/docker/libcontainer/user"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/docker/libcontainer/user"
 )
 
 func main() {
@@ -24,7 +25,8 @@ func main() {
 
 func tmplConfigVar(template string, v *configInterpolation) string {
 	shell := "/bin/bash"
-	return strings.Replace(strings.Replace(strings.Replace(template, "%h", v.Home, -1), "%u", v.User, -1), "%s", shell, -1)
+	r := strings.NewReplacer("%h", v.Home, "%u", v.User, "%s", shell) // Arguments are old, new ...
+	return r.Replace(template)
 }
 
 func realMain() int {
