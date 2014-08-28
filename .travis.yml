@@ -1,5 +1,5 @@
 language: go
-install: go get
+install: go get ; go get -v github.com/mattn/goveralls
 after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
 
