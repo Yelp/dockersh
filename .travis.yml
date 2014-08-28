@@ -1,14 +1,13 @@
----
 language: go
 install: go get
-go:
-  - 1.2
-  - 1.3
-
+go: 
 # 17:52 <@frew> t0m: fyi, if you wanted to get coverage info about your tests from dockerssh, you might look at
 #               https://github.com/syncthing/syncthing/blob/fe7b77198cdf7fbf2ff0903f55a8b44f6ab2e157/.travis.yml and
 #                             https://github.com/syncthing/syncthing/blob/fe7b77198cdf7fbf2ff0903f55a8b44f6ab2e157/build.sh
 # after_success:
 #  - goveralls -coverprofile=coverage.out -service=travis-ci -package=syncthing/syncthing -repotoken="$COVERALLS_TOKEN"
 
+env: 
+  global: 
+    secure: UyAu9yz2SswujPtGkebXp9wMTPR0AssBknx7oxDo7X4iTpgOV7xJPF6oqRKdBV5DLs/65Ms16cFBYaqRtr65j6EEj0X/KPAuiRa3K5rfl1QVNKOYUUZaV+yMr+p2JN5rvHaonPw1mwq1WDq4jXLCUYpW4VFoGSek8Kci/Rwp94o=
 
