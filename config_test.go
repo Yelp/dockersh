@@ -1,13 +1,12 @@
 package main
 
 import "testing"
-import "fmt"
 
 func Test_DefaultConfig_1(t *testing.T) {
 	if defaultConfig.ImageName == "busybox" {
 		t.Log("default ImageName passed.")
 	} else {
-		t.Error(fmt.Sprintf("default ImageName failed: expected busybox got %s", defaultConfig.ImageName))
+		t.Errorf("default ImageName failed: expected busybox got %s", defaultConfig.ImageName)
 	}
 }
 
@@ -24,7 +23,7 @@ imagename = testimage`), "fred")
 	if c.ImageName == "testimage" {
 		t.Log("set ImageName passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
+		t.Errorf("Expected ImageName testimage got %s", c.ImageName)
 	}
 }
 
@@ -42,17 +41,17 @@ containerusername = bill`), "fred")
 	if c.Shell == "someshell" {
 		t.Log("set Shell in dockersh config passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected Shell dockersg got %s", c.Shell))
+		t.Errorf("Expected Shell dockersg got %s", c.Shell)
 	}
 	if c.ContainerUsername == "bill" {
 		t.Log("set ContainerUserName in user config passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ContainerUserName bill got %s", c.ContainerUsername))
+		t.Errorf("Expected ContainerUserName bill got %s", c.ContainerUsername)
 	}
 	if c.ImageName == "fredsimage" {
 		t.Log("set ImageName in user config passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName fredsimage got %s", c.ImageName))
+		t.Errorf("Expected ImageName fredsimage got %s", c.ImageName)
 	}
 }
 
@@ -68,7 +67,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	if c.ImageName == "testimage" {
 		t.Log("set ImageName passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
+		t.Errorf("Expected ImageName testimage got %s", c.ImageName)
 	}
 	if c.ContainerUsername == "default_contun" {
 		t.Log("blacklising worked, value not changed")
@@ -134,7 +133,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	if c.ImageName == "testimage" {
 		t.Log("set ImageName passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
+		t.Errorf("Expected ImageName testimage got %s", c.ImageName)
 	}
 	if c.ContainerUsername != "default_contun" {
 		t.Error("blacklising disabled, value changed")
@@ -159,7 +158,7 @@ containerusername = shouldbeblacklisted`), "fred")
 	if c.ImageName == "default" {
 		t.Log("set ImageName passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName default got %s", c.ImageName))
+		t.Errorf("Expected ImageName default got %s", c.ImageName)
 	}
 	if c.ContainerUsername != "default_contun" {
 		t.Error("blacklising disabled, value changed")
@@ -182,6 +181,6 @@ imagename = testimage
 	if c.ImageName == "testimage" {
 		t.Log("set ImageName in user section when blacklisted in [dockersh] passed.")
 	} else {
-		t.Error(fmt.Sprintf("Expected ImageName testimage got %s", c.ImageName))
+		t.Errorf("Expected ImageName testimage got %s", c.ImageName)
 	}
 }
