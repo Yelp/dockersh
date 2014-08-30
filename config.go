@@ -1,11 +1,11 @@
 package main
 
 import (
-	"code.google.com/p/gcfg"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"code.google.com/p/gcfg"
 )
 
 type Configuration struct {
@@ -72,10 +72,8 @@ func loadAllConfig(user string, homedir string) (config Configuration, err error
 			return config, err
 		}
 		return mergeConfigs(mergeConfigs(defaultConfig, globalconfig, false), localconfig, true), nil
-	} else {
-		return mergeConfigs(defaultConfig, globalconfig, false), nil
 	}
-
+	return mergeConfigs(defaultConfig, globalconfig, false), nil
 }
 
 type loadableFile string
@@ -84,7 +82,7 @@ func (fn loadableFile) Getcontents() ([]byte, error) {
 	localConfigFile, err := os.Open(string(fn))
 	var b []byte
 	if err != nil {
-		return b, errors.New(fmt.Sprintf("Could not open: %s", string(fn)))
+		return b, fmt.Errorf("Could not open: %s", string(fn))
 	}
 	b, err = ioutil.ReadAll(localConfigFile)
 	if err != nil {
