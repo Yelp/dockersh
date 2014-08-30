@@ -2,7 +2,7 @@ language: go
 install: go get ; go get -v github.com/mattn/goveralls
 test: go test -coverprofile=profile.out .
 after_success:
-  - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
+  - /home/travis/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
 
 env: 
   global: 
