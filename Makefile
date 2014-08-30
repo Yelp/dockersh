@@ -3,7 +3,7 @@ dockersh: test
 	strip dockersh
  
 test:
-	go test -coverprofile=profile.out
+	PATH=testutils/:$(PATH) go test -coverprofile=profile.out
 
 clean:
 	rm -f dockersh
