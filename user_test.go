@@ -5,8 +5,8 @@ import "os/user"
 
 func Test_getCurrentUser_1(t *testing.T) {
     _, _, _, _, err := getCurrentUser()
-    if err == nil {
-        t.Error("No error from getUser")
+    if err != nil {
+        t.Error("Error from getCurrentUser")
     }
 }
 
