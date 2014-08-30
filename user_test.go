@@ -4,10 +4,10 @@ import "testing"
 import "os/user"
 
 func Test_getCurrentUser_1(t *testing.T) {
-    _, _, _, _, err := getCurrentUser()
-    if err != nil {
-        t.Error("Error from getCurrentUser")
-    }
+	_, _, _, _, err := getCurrentUser()
+	if err != nil {
+		t.Error("Error from getCurrentUser")
+	}
 }
 
 func Test_getUser_1(t *testing.T) {
@@ -53,4 +53,3 @@ func Test_getUser_3(t *testing.T) {
 		t.Error("No error from getUser")
 	}
 }
-
