@@ -3,6 +3,13 @@ package main
 import "testing"
 import "os/user"
 
+func Test_getCurrentUser_1(t *testing.T) {
+    _, _, _, _, err := getCurrentUser()
+    if err == nil {
+        t.Error("No error from getUser")
+    }
+}
+
 func Test_getUser_1(t *testing.T) {
 	mockuser := &user.User{Username: "vagrant", HomeDir: "/home/vagrant", Uid: "1000", Gid: "1000"}
 	username, homedir, uid, gid, err := getUser(mockuser)
