@@ -1,7 +1,7 @@
 language: go
 install: go get ; go get -v github.com/mattn/goveralls ; go get code.google.com/p/go.tools/cmd/cover
 after_success:
-  - /home/travis/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
+  - /home/travis/gopath/bin/goveralls -coverprofile=profile.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
 
 env: 
   global: 
