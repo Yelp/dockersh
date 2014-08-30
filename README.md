@@ -1,5 +1,5 @@
   * ![Build status](https://travis-ci.org/Yelp/dockersh.svg)
-  * [Code coverage](https://coveralls.io/r/Yelp/dockersh)
+  * [![Coverage Status](https://coveralls.io/repos/Yelp/dockersh/badge.png)](https://coveralls.io/r/Yelp/dockersh)
   * [Dockerhub container](https://registry.hub.docker.com/u/yelp/dockersh/)
 
 dockersh
