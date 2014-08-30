@@ -2,6 +2,15 @@ package main
 
 import "testing"
 
+func Test_Dump_1(t *testing.T) {
+	exp := "ImageName busybox MountHomeTo %h ContainerUsername %u Shell /bin/ash DockerSocket /var/run/docker.sock"
+	str := defaultConfig.Dump()
+	if str != exp {
+		t.Errorf("Got '%s' expected '%s'", str, exp)
+	}
+
+}
+
 func Test_DefaultConfig_1(t *testing.T) {
 	if defaultConfig.ImageName == "busybox" {
 		t.Log("default ImageName passed.")
