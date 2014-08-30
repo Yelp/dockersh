@@ -2,6 +2,13 @@ package main
 
 import "testing"
 
+func Test_loadAllConfig_1(t *testing.T) {
+	_, err := loadAllConfig("notexist", "/notexist")
+	if err != nil {
+                t.Errorf("Got error %v", err)
+        }
+}
+
 func Test_Dump_1(t *testing.T) {
 	exp := "ImageName busybox MountHomeTo %h ContainerUsername %u Shell /bin/ash DockerSocket /var/run/docker.sock"
 	str := defaultConfig.Dump()
