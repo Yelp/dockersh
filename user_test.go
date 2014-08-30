@@ -3,7 +3,7 @@ package main
 import "testing"
 import "os/user"
 
-func Test_Add2Ints_1(t *testing.T) {
+func Test_getUser_1(t *testing.T) {
 	mockuser := &user.User{Username: "vagrant", HomeDir: "/home/vagrant", Uid: "1000", Gid: "1000"}
 	username, homedir, uid, gid, err := getUser(mockuser)
 	if err != nil {
@@ -30,3 +30,20 @@ func Test_Add2Ints_1(t *testing.T) {
 		t.Errorf("gid failed: %i", gid)
 	}
 }
+
+func Test_getUser_2(t *testing.T) {
+	mockuser := &user.User{Username: "", HomeDir: "/home/vagrant", Uid: "1000", Gid: "1000"}
+	username, homedir, uid, gid, err := getUser(mockuser)
+	if err == nil {
+		t.Error("No error from getUser")
+	}
+}
+
+func Test_getUser_3(t *testing.T) {
+	mockuser := &user.User{Username: "Foo", HomeDir: "", Uid: "1000", Gid: "1000"}
+	username, homedir, uid, gid, err := getUser(mockuser)
+	if err == nil {
+		t.Error("No error from getUser")
+	}
+}
+
