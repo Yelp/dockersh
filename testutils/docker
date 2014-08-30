@@ -1,5 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "$*" > docker.in
+
+ARG1=$1
+if [ "$ARG1" == "inspect" ];then
+  echo 666
+fi
+
 exit 0
 
