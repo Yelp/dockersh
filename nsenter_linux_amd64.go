@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -137,9 +136,6 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		defer cleaner.Cleanup()
 	}
 
-	// err = writeUserMappings(pid, []IDMap{{ContainerID: 0, HostID: uint32(uid)}}, []IDMap{{ContainerID: 0, HostID: uint32(gid)}})
-	// if err != nil
-
 	var wstatus WaitStatus
 	_, err1 := Wait4(pid, &wstatus, 0, nil)
 	if err != nil {
@@ -149,41 +145,3 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 	return nil
 }
 
-// Stolen from https://raw.githubusercontent.com/mrunalp/libcontainer/152f2faa63f6db55417e84bb4eb52671de820815/forkexec/forkexec.go
-type IDMap struct {
-	ContainerID uint32
-	HostID      uint32
-	Size        uint32
-}
-
-// Write UID/GID mappings for a process.
-func writeUserMappings(pid int, uidMappings, gidMappings []IDMap) error {
-	if len(uidMappings) > 5 || len(gidMappings) > 5 {
-		return fmt.Errorf("Only 5 uid/gid mappings are supported by the kernel")
-	}
-
-	uidMapStr := make([]string, len(uidMappings))
-	for i, um := range uidMappings {
-		uidMapStr[i] = fmt.Sprintf("%v %v %v", um.ContainerID, um.HostID, um.Size)
-	}
-
-	gidMapStr := make([]string, len(gidMappings))
-	for i, gm := range gidMappings {
-		gidMapStr[i] = fmt.Sprintf("%v %v %v", gm.ContainerID, gm.HostID, gm.Size)
-	}
-
-	uidMap := []byte(strings.Join(uidMapStr, "\n"))
-	gidMap := []byte(strings.Join(gidMapStr, "\n"))
-
-	uidMappingsFile := fmt.Sprintf("/proc/%v/uid_map", pid)
-	gidMappingsFile := fmt.Sprintf("/proc/%v/gid_map", pid)
-
-	if err := ioutil.WriteFile(uidMappingsFile, uidMap, 0644); err != nil {
-		return err
-	}
-	if err := ioutil.WriteFile(gidMappingsFile, gidMap, 0644); err != nil {
-		return err
-	}
-
-	return nil
-}
