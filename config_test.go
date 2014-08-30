@@ -1,8 +1,15 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"os"
+)
 
 func Test_loadAllConfig_1(t *testing.T) {
+	if _, err := os.Stat("/etc/dockersh"); os.IsNotExist(err) {
+    		t.Log("No /etc/dockersh, skipping test")
+    		return
+	}
 	_, err := loadAllConfig("notexist", "/notexist")
 	if err != nil {
                 t.Errorf("Got error %v", err)
