@@ -68,7 +68,7 @@ Requirements
 
 Linux >= 3.8
 
-Docker >= 1.0.0
+Docker >= 1.2.0
 
 If you want to build it locally (rather than in a docker container), Go >= 1.2
 

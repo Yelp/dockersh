@@ -12,7 +12,6 @@ import (
 	"github.com/coreos/go-namespaces/namespace"
 	"github.com/docker/libcontainer"
 	"github.com/docker/libcontainer/namespaces"
-	"github.com/docker/libcontainer/security/capabilities"
 )
 
 func loadContainer(path string) (*libcontainer.Config, error) {
@@ -32,30 +31,6 @@ func loadContainer(path string) (*libcontainer.Config, error) {
 
 func openNamespaceFd(pid int, path string) (*os.File, error) {
 	return os.Open(fmt.Sprintf("/proc/%s/root%s", strconv.Itoa(pid), path))
-}
-
-func dropCaps() (err error) {
-	// Drop capabilities except those in the whitelist, from https://github.com/docker/docker/blob/master/daemon/execdriver/native/template/default_template.go
-	cape := capabilities.DropBoundingSet([]string{
-		"CHOWN",
-		"DAC_OVERRIDE",
-		"FSETID",
-		"FOWNER",
-		//"MKNOD",
-		//"NET_RAW",
-		//"SETGID",
-		//"SETUID",
-		"SETFCAP",
-		"SETPCAP",
-		"NET_BIND_SERVICE",
-		"SYS_CHROOT",
-		"KILL",
-		"AUDIT_WRITE",
-	})
-	if cape != nil {
-		panic(cape)
-	}
-	return nil
 }
 
 func nsenterexec(containerName string, uid int, gid int, groups []int, wd string, shell string) (err error) {
@@ -104,7 +79,6 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 		namespace.Setns(nsfd, ns)
 		namespace.Close(nsfd)
 	}
-	dropCaps()
 
 	pid, err := ForkExec(shell, []string{"sh"}, &ProcAttr{
 		//Env:
