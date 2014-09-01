@@ -13,3 +13,15 @@ func Test_templConfigVar_1(t *testing.T) {
 		t.Error("Expected /bin/bash, got %s", out)
 	}
 }
+
+func Test_getInterpolatedConfig_1(t *testing.T) {
+	i := configInterpolation{"foo", "bar"}
+	c := defaultConfig
+	e := getInterpolatedConfig(&c, i)
+	if e != nil {
+		t.Error("Error")
+	}
+	if c.MountHomeFrom != "foo" {
+		t.Errorf("MountHomeFrom is %s not foo", c.MountHomeFrom)
+	}
+}

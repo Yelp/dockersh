@@ -29,6 +29,17 @@ func tmplConfigVar(template string, v *configInterpolation) string {
 	return r.Replace(template)
 }
 
+func getInterpolatedConfig(config *Configuration, configInterpolations configInterpolation) error {
+	config.ContainerUsername = tmplConfigVar(config.ContainerUsername, &configInterpolations)
+	config.MountHomeTo = tmplConfigVar(config.MountHomeTo, &configInterpolations)
+	config.MountHomeFrom = tmplConfigVar(config.MountHomeFrom, &configInterpolations)
+	config.ImageName = tmplConfigVar(config.ImageName, &configInterpolations)
+	config.Shell = tmplConfigVar(config.Shell, &configInterpolations)
+	config.UserCwd = tmplConfigVar(config.UserCwd, &configInterpolations)
+	config.ContainerName = tmplConfigVar(config.ContainerName, &configInterpolations)
+	return nil
+}
+
 func realMain() int {
 	username, homedir, uid, gid, err := getCurrentUser()
 	if err != nil {
@@ -41,24 +52,21 @@ func realMain() int {
 		return 1
 	}
 	configInterpolations := configInterpolation{homedir, username}
-	realUsername := tmplConfigVar(config.ContainerUsername, &configInterpolations)
-	realHomedirTo := tmplConfigVar(config.MountHomeTo, &configInterpolations)
-	realHomedirFrom := tmplConfigVar(config.MountHomeFrom, &configInterpolations)
-	realImageName := tmplConfigVar(config.ImageName, &configInterpolations)
-	realShell := tmplConfigVar(config.Shell, &configInterpolations)
-	realUserCwd := tmplConfigVar(config.UserCwd, &configInterpolations)
-	realContainerName := tmplConfigVar(config.ContainerName, &configInterpolations)
-
-	_, err = dockerpid(realContainerName)
+	err = getInterpolatedConfig(&config, configInterpolations)
 	if err != nil {
-		_, err = dockerstart(realUsername, realHomedirFrom, realHomedirTo, realContainerName, realImageName, config.DockerSocket, config.MountHome, config.MountTmp, config.MountDockerSocket, config.Entrypoint, config.Cmd, config.DockerOpt)
+		panic(fmt.Sprintf("Cannot interpolate config: %v", err))
+	}
+
+	_, err = dockerpid(config.ContainerName)
+	if err != nil {
+		_, err = dockerstart(config.ContainerUsername, config.MountHomeFrom, config.MountHomeTo, config.ContainerName, config.ImageName, config.DockerSocket, config.MountHome, config.MountTmp, config.MountDockerSocket, config.Entrypoint, config.Cmd, config.DockerOpt)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
 		}
 	}
 	_, _, groups, _, err := user.GetUserGroupSupplementaryHome(username, 65536, 65536, "/")
-	err = nsenterexec(realContainerName, uid, gid, groups, realUserCwd, realShell)
+	err = nsenterexec(config.ContainerName, uid, gid, groups, config.UserCwd, config.Shell)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting shell in new container: %v\n", err)
 		return 1

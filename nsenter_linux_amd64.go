@@ -144,4 +144,3 @@ func nsenterexec(containerName string, uid int, gid int, groups []int, wd string
 
 	return nil
 }
-
