@@ -33,7 +33,7 @@ processes and networking.
 
 This means that the user is isolated from the rest of the system, and they can only see their own processes,
 and have their own network stack. This gives better privacy between users, and can also be used for more easily
-seperating each user's processes from the rest of the system with per user constraints.
+separating each user's processes from the rest of the system with per user constraints.
 
 
 Normally to give users individual containers you have to run an ssh daemon in each
