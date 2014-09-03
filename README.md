@@ -203,7 +203,7 @@ they have uploaded to the registry, and have ssh agent forwarding working, with 
     mounthome
     mounttmp
     enableuserconfig
-    enableshell
+    enableusershell
 
     [user "someadminguy"]
     mountdockersocket
