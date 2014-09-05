@@ -38,6 +38,8 @@ type Configuration struct {
 	EnableUserCmd               bool
 	DockerOpt                   []string
 	EnableUserDockerOpt         bool
+	ReverseForward              []string
+	EnableUserReverseForward    bool
 }
 
 func (c Configuration) Dump() string {
@@ -142,6 +144,9 @@ func mergeConfigs(old Configuration, new Configuration, blacklist bool) (ret Con
 	}
 	if (!blacklist || old.EnableUserDockerOpt) && len(new.DockerOpt) > 0 {
 		old.DockerOpt = new.DockerOpt
+	}
+	if (!blacklist || old.EnableUserReverseForward) && len(new.ReverseForward) > 0 {
+		old.ReverseForward = new.ReverseForward
 	}
 	if !blacklist && new.EnableUserConfig == true {
 		old.EnableUserConfig = true

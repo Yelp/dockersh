@@ -25,7 +25,8 @@ func Test_dockerSha_1(t *testing.T) {
 }
 
 func Test_dockerStart(t *testing.T) {
-	pid, err := dockerstart("someuser", "homedirfrom", "homedirto", "name", "container", "dockersock", true, true, true, "internal", []string{"foo"}, []string{"bar"})
+	c := Configuration{}
+	pid, err := dockerstart(c, "someuser", "homedirfrom", "homedirto", "name", "container", "dockersock", true, true, true, "internal", []string{"foo"}, []string{"bar"})
 	if err != nil {
 		t.Errorf("Error from dockerstart: %v", err)
 	}

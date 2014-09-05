@@ -42,7 +42,7 @@ func dockersha(name string) (sha string, err error) {
 	return sha, nil
 }
 
-func dockerstart(username string, homedirfrom string, homedirto string, name string, container string, dockersock string, bindhome bool, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
+func dockerstart(config Configuration, username string, homedirfrom string, homedirto string, name string, container string, dockersock string, bindhome bool, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
@@ -72,6 +72,10 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 	}
 	if bindSelfAsInit {
 		cmdtxt = append(cmdtxt, "-v", thisBinary+":/init")
+	} else {
+		if len(config.ReverseForward) > 0 {
+			return -1, errors.New("Cannot configure ReverseForward with a custom init process")
+		}
 	}
 	if binddocker {
 		cmdtxt = append(cmdtxt, "-v", dockersock+":/var/run/docker.sock")
@@ -84,6 +88,10 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 	} else {
 		cmdtxt = append(cmdtxt, "")
 	}
+	if len(config.ReverseForward) > 0 {
+		setupReverseForward(&cmdtxt, config.ReverseForward)
+	}
+
 	//fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
 	cmd = exec.Command("docker", cmdtxt...)
 	var output bytes.Buffer
@@ -94,4 +102,8 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 		return -1, errors.New(err.Error() + ":\n" + output.String())
 	}
 	return dockerpid(name)
+}
+
+func setupReverseForward(cmdtxt *[]string, reverseForward []string) {
+
 }
