@@ -42,11 +42,12 @@ func dockersha(name string) (sha string, err error) {
 	return sha, nil
 }
 
-func dockerstart(config Configuration, name string, container string, dockersock string, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
+func dockerstart(config Configuration, name string, container string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
 	bindSelfAsInit := false
+	init := config.Entrypoint
 	if init == "internal" {
 		init = "/init"
 		bindSelfAsInit = true
@@ -59,8 +60,8 @@ func dockerstart(config Configuration, name string, container string, dockersock
 		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro",
 		"--cap-drop", "SUID", "--cap-drop", "SGID", "--cap-drop", "NET_RAW",
 		"--cap-drop", "MKNOD"}
-	if len(dockeropts) > 0 {
-		for _, element := range dockeropts {
+	if len(config.DockerOpt) > 0 {
+		for _, element := range config.DockerOpt {
 			cmdtxt = append(cmdtxt, element)
 		}
 	}
@@ -78,11 +79,11 @@ func dockerstart(config Configuration, name string, container string, dockersock
 		}
 	}
 	if config.MountDockerSocket {
-		cmdtxt = append(cmdtxt, "-v", dockersock+":/var/run/docker.sock")
+		cmdtxt = append(cmdtxt, "-v", config.DockerSocket+":/var/run/docker.sock")
 	}
 	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container)
-	if len(cmdargs) > 0 {
-		for _, element := range cmdargs {
+	if len(config.Cmd) > 0 {
+		for _, element := range config.Cmd {
 			cmdtxt = append(cmdtxt, element)
 		}
 	} else {
