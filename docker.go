@@ -44,8 +44,25 @@ func dockersha(name string) (sha string, err error) {
 
 func dockerstart(config Configuration) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", config.ContainerName)
+	_ = cmd.Run()
+	cmdtxt, err := dockercmdline(config)
+	if err != nil {
+		return -1, err
+	}
+	//fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
+	cmd = exec.Command("docker", cmdtxt...)
+	var output bytes.Buffer
+	cmd.Stdout = &output
+	cmd.Stderr = &output
 	err = cmd.Run()
+	if err != nil {
+		return -1, errors.New(err.Error() + ":\n" + output.String())
+	}
+	return dockerpid(config.ContainerName)
+}
 
+func dockercmdline(config Configuration) ([]string, error) {
+	var err error
 	bindSelfAsInit := false
 	init := config.Entrypoint
 	if init == "internal" {
@@ -75,7 +92,7 @@ func dockerstart(config Configuration) (pid int, err error) {
 		cmdtxt = append(cmdtxt, "-v", thisBinary+":/init")
 	} else {
 		if len(config.ReverseForward) > 0 {
-			return -1, errors.New("Cannot configure ReverseForward with a custom init process")
+			return []string{}, errors.New("Cannot configure ReverseForward with a custom init process")
 		}
 	}
 	if config.MountDockerSocket {
@@ -92,20 +109,11 @@ func dockerstart(config Configuration) (pid int, err error) {
 	if len(config.ReverseForward) > 0 {
 		cmdtxt, err = setupReverseForward(cmdtxt, config.ReverseForward)
 		if err != nil {
-			return -1, err
+			return []string{}, err
 		}
 	}
 
-	//fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
-	cmd = exec.Command("docker", cmdtxt...)
-	var output bytes.Buffer
-	cmd.Stdout = &output
-	cmd.Stderr = &output
-	err = cmd.Run()
-	if err != nil {
-		return -1, errors.New(err.Error() + ":\n" + output.String())
-	}
-	return dockerpid(config.ContainerName)
+	return cmdtxt, nil
 }
 
 func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, error) {
