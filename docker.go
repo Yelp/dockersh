@@ -42,7 +42,7 @@ func dockersha(name string) (sha string, err error) {
 	return sha, nil
 }
 
-func dockerstart(config Configuration, name string, container string, dockersock string, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
+func dockerstart(config Configuration, name string, container string, dockersock string, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
@@ -64,7 +64,7 @@ func dockerstart(config Configuration, name string, container string, dockersock
 			cmdtxt = append(cmdtxt, element)
 		}
 	}
-	if bindtmp {
+	if config.MountTmp {
 		cmdtxt = append(cmdtxt, "-v", "/tmp:/tmp")
 	}
 	if config.MountHome {
@@ -77,7 +77,7 @@ func dockerstart(config Configuration, name string, container string, dockersock
 			return -1, errors.New("Cannot configure ReverseForward with a custom init process")
 		}
 	}
-	if binddocker {
+	if config.MountDockerSocket {
 		cmdtxt = append(cmdtxt, "-v", dockersock+":/var/run/docker.sock")
 	}
 	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container)
