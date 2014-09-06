@@ -56,7 +56,9 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 		thisBinary, _ = filepath.Abs(os.Args[0])
 	}
 	var cmdtxt = []string{"run", "-d", "-u", username,
-		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro"}
+		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro",
+		"--cap-drop", "SUID", "--cap-drop", "SGID", "--cap-drop", "NET_RAW",
+		"--cap-drop", "MKNOD"}
 	if len(dockeropts) > 0 {
 		for _, element := range dockeropts {
 			cmdtxt = append(cmdtxt, element)
