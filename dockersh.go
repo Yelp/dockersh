@@ -12,12 +12,7 @@ import (
 
 func main() {
 	if os.Args[0] == "/init" {
-		fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
-		// Wait for terminating signal
-		sc := make(chan os.Signal, 2)
-		signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
-		<-sc
-		os.Exit(0)
+		os.Exit(initMain())
 	} else {
 		os.Exit(realMain())
 	}
@@ -38,6 +33,15 @@ func getInterpolatedConfig(config *Configuration, configInterpolations configInt
 	config.UserCwd = tmplConfigVar(config.UserCwd, &configInterpolations)
 	config.ContainerName = tmplConfigVar(config.ContainerName, &configInterpolations)
 	return nil
+}
+
+func initMain() int {
+	fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
+	// Wait for terminating signal
+	sc := make(chan os.Signal, 2)
+	signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
+	<-sc
+	return 0
 }
 
 func realMain() int {
