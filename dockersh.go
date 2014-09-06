@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/docker/libcontainer/user"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
-
-	"github.com/docker/libcontainer/user"
 )
 
 func main() {
@@ -35,8 +35,35 @@ func getInterpolatedConfig(config *Configuration, configInterpolations configInt
 	return nil
 }
 
+func Readln(r *bufio.Reader) (string, error) {
+	var (
+		isPrefix bool  = true
+		err      error = nil
+		line, ln []byte
+	)
+	for isPrefix && err == nil {
+		line, isPrefix, err = r.ReadLine()
+		ln = append(ln, line...)
+	}
+	return string(ln), err
+}
+
 func initMain() int {
 	fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
+	if file, err := os.Open("/portforward"); err == nil {
+		fmt.Printf("/portforward file exists; processing...")
+		r := bufio.NewReader(file)
+		s, err := Readln(r)
+		for err == nil {
+			fmt.Println(s)
+			parts := strings.Split(s, ":") // Parts is hostport:containerport
+			localAddr := "127.0.0.1:" + parts[1]
+			remoteAddr := "169.254.1.1:" + parts[0]
+			go proxyMain(localAddr, remoteAddr)
+			s, err = Readln(r)
+		}
+		file.Close()
+	}
 	// Wait for terminating signal
 	sc := make(chan os.Signal, 2)
 	signal.Notify(sc, syscall.SIGTERM, syscall.SIGINT)
