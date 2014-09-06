@@ -42,7 +42,7 @@ func dockersha(name string) (sha string, err error) {
 	return sha, nil
 }
 
-func dockerstart(config Configuration, username string, homedirfrom string, homedirto string, name string, container string, dockersock string, bindhome bool, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
+func dockerstart(config Configuration, name string, container string, dockersock string, bindtmp bool, binddocker bool, init string, cmdargs []string, dockeropts []string) (pid int, err error) {
 	cmd := exec.Command("docker", "rm", name)
 	err = cmd.Run()
 
@@ -55,7 +55,7 @@ func dockerstart(config Configuration, username string, homedirfrom string, home
 	if os.Getenv("SHELL") != "/usr/local/bin/dockersh" {
 		thisBinary, _ = filepath.Abs(os.Args[0])
 	}
-	var cmdtxt = []string{"run", "-d", "-u", username,
+	var cmdtxt = []string{"run", "-d", "-u", config.ContainerUsername,
 		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro",
 		"--cap-drop", "SUID", "--cap-drop", "SGID", "--cap-drop", "NET_RAW",
 		"--cap-drop", "MKNOD"}
@@ -67,8 +67,8 @@ func dockerstart(config Configuration, username string, homedirfrom string, home
 	if bindtmp {
 		cmdtxt = append(cmdtxt, "-v", "/tmp:/tmp")
 	}
-	if bindhome {
-		cmdtxt = append(cmdtxt, "-v", fmt.Sprintf("%s:%s:rw", homedirfrom, homedirto))
+	if config.MountHome {
+		cmdtxt = append(cmdtxt, "-v", fmt.Sprintf("%s:%s:rw", config.MountHomeFrom, config.MountHomeTo))
 	}
 	if bindSelfAsInit {
 		cmdtxt = append(cmdtxt, "-v", thisBinary+":/init")
