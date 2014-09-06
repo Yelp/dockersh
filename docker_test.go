@@ -25,8 +25,8 @@ func Test_dockerSha_1(t *testing.T) {
 }
 
 func Test_dockerStart(t *testing.T) {
-	c := Configuration{MountHome: true, MountHomeFrom: "/home/fred", MountHomeTo: "/home/fred", Entrypoint: "internal", DockerSocket: "dockersock", Cmd: []string{"foo"}, DockerOpt: []string{"bar"}}
-	pid, err := dockerstart(c, "name", "container")
+	c := Configuration{ContainerName: "somecontainer", ImageName: "busybox", MountHome: true, MountHomeFrom: "/home/fred", MountHomeTo: "/home/fred", Entrypoint: "internal", DockerSocket: "dockersock", Cmd: []string{"foo"}, DockerOpt: []string{"bar"}}
+	pid, err := dockerstart(c)
 	if err != nil {
 		t.Errorf("Error from dockerstart: %v", err)
 	}

@@ -42,8 +42,8 @@ func dockersha(name string) (sha string, err error) {
 	return sha, nil
 }
 
-func dockerstart(config Configuration, name string, container string) (pid int, err error) {
-	cmd := exec.Command("docker", "rm", name)
+func dockerstart(config Configuration) (pid int, err error) {
+	cmd := exec.Command("docker", "rm", config.ContainerName)
 	err = cmd.Run()
 
 	bindSelfAsInit := false
@@ -81,7 +81,7 @@ func dockerstart(config Configuration, name string, container string) (pid int, 
 	if config.MountDockerSocket {
 		cmdtxt = append(cmdtxt, "-v", config.DockerSocket+":/var/run/docker.sock")
 	}
-	cmdtxt = append(cmdtxt, "--name", name, "--entrypoint", init, container)
+	cmdtxt = append(cmdtxt, "--name", config.ContainerName, "--entrypoint", init, config.ImageName)
 	if len(config.Cmd) > 0 {
 		for _, element := range config.Cmd {
 			cmdtxt = append(cmdtxt, element)
@@ -105,7 +105,7 @@ func dockerstart(config Configuration, name string, container string) (pid int, 
 	if err != nil {
 		return -1, errors.New(err.Error() + ":\n" + output.String())
 	}
-	return dockerpid(name)
+	return dockerpid(config.ContainerName)
 }
 
 func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, error) {

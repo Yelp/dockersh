@@ -59,7 +59,7 @@ func realMain() int {
 
 	_, err = dockerpid(config.ContainerName)
 	if err != nil {
-		_, err = dockerstart(config, config.ContainerName, config.ImageName)
+		_, err = dockerstart(config)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not start container: %s\n", err)
 			return 1
