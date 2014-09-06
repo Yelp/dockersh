@@ -89,7 +89,10 @@ func dockerstart(config Configuration, username string, homedirfrom string, home
 		cmdtxt = append(cmdtxt, "")
 	}
 	if len(config.ReverseForward) > 0 {
-		setupReverseForward(&cmdtxt, config.ReverseForward)
+		cmdtxt, err = setupReverseForward(cmdtxt, config.ReverseForward)
+		if err != nil {
+			return -1, err
+		}
 	}
 
 	//fmt.Fprintf(os.Stderr, "docker %s\n", strings.Join(cmdtxt, " "))
@@ -104,6 +107,20 @@ func dockerstart(config Configuration, username string, homedirfrom string, home
 	return dockerpid(name)
 }
 
-func setupReverseForward(cmdtxt *[]string, reverseForward []string) {
-
+func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, error) {
+	fn := "/tmp/data" // FIXME filename
+	f, err := os.Create(fn)
+	if err != nil {
+		return cmdtxt, errors.New("Could not create ReverseForward file:" + err.Error())
+	}
+	defer f.Close()
+	for _, element := range reverseForward {
+		// FIXME - Validate the string is sane here!
+		//        strings.Split(element, ":")
+		f.WriteString(element + "\n")
+		cmdtxt = append(cmdtxt, element)
+	}
+	cmdtxt = append(cmdtxt, "-v")
+	cmdtxt = append(cmdtxt, fmt.Sprintf("%s:/portforward:ro", fn))
+	return cmdtxt, nil
 }
