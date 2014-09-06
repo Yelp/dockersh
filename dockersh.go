@@ -72,6 +72,11 @@ func initMain() int {
 }
 
 func realMain() int {
+	err := dockerVersionCheck()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Docker version error: %v", err)
+		return 1
+	}
 	username, homedir, uid, gid, err := getCurrentUser()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not get current user: %v", err)

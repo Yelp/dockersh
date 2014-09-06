@@ -11,6 +11,27 @@ import (
 	"strings"
 )
 
+func dockerVersionCheck() (err error) {
+	versionString, err := getDockerVersionString()
+	// Docker version 1.1.2, build d84a070
+	versionStringParts = strings.Split(versionString, " ")
+	versionParts = strings.Split(versionStringParts[2], ".")
+	major, _ = strconv.Atoi(versionParts[0])
+	minor, _ = strconv.Atoi(versionParts[1])
+	if major > 1 {
+		return nil
+	}
+	if minor >= 2 {
+		return nil
+	}
+	return errors.New(fmt.Sprintf("Docker version '%s' lower than desired version '1.2.0'", versionStringParts[2]))
+}
+
+func getDockerVersionString() (string, error) {
+	cmd := exec.Command("docker", "-v")
+	return cmd.Output()
+}
+
 func dockerpid(name string) (pid int, err error) {
 	cmd := exec.Command("docker", "inspect", "--format", "{{.State.Pid}}", name)
 	output, err := cmd.Output()
