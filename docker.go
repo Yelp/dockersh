@@ -14,10 +14,10 @@ import (
 func dockerVersionCheck() (err error) {
 	versionString, err := getDockerVersionString()
 	// Docker version 1.1.2, build d84a070
-	versionStringParts = strings.Split(versionString, " ")
-	versionParts = strings.Split(versionStringParts[2], ".")
-	major, _ = strconv.Atoi(versionParts[0])
-	minor, _ = strconv.Atoi(versionParts[1])
+	versionStringParts := strings.Split(versionString, " ")
+	versionParts := strings.Split(versionStringParts[2], ".")
+	major, _ := strconv.Atoi(versionParts[0])
+	minor, _ := strconv.Atoi(versionParts[1])
 	if major > 1 {
 		return nil
 	}
@@ -29,7 +29,8 @@ func dockerVersionCheck() (err error) {
 
 func getDockerVersionString() (string, error) {
 	cmd := exec.Command("docker", "-v")
-	return cmd.Output()
+	o, err := cmd.Output()
+	return string(o), err
 }
 
 func dockerpid(name string) (pid int, err error) {
