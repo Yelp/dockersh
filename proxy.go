@@ -1,13 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/hex"
 	"fmt"
 	"io"
-	"log"
 	"net"
-	"os"
 )
 
 func proxyConn(remoteAddr string, conn *net.TCPConn) {
@@ -24,40 +20,8 @@ func proxyConn(remoteAddr string, conn *net.TCPConn) {
 	}
 	defer rConn.Close()
 
-	buf := &bytes.Buffer{}
-	for {
-		fmt.Printf("Start byte loop\n")
-		data := make([]byte, 256)
-		n, err := conn.Read(data)
-		fmt.Printf("Done read\n")
-		if err != nil {
-			fmt.Printf("%v", err)
-			return
-		}
-		buf.Write(data[:n])
-		fmt.Printf("Done write\n")
-		if data[0] == 13 && data[1] == 10 {
-			break
-		}
-	}
-
-	if _, err := rConn.Write(buf.Bytes()); err != nil {
-		fmt.Printf("%v", err)
-		return
-	}
-	log.Printf("sent:\n%v", hex.Dump(buf.Bytes()))
-
-	data := make([]byte, 1024)
-	n, err := rConn.Read(data)
-	if err != nil {
-		if err != io.EOF {
-			fmt.Printf("%v", err)
-			return
-		} else {
-			log.Printf("received err: %v", err)
-		}
-	}
-	log.Printf("received:\n%v", hex.Dump(data[:n]))
+	go io.Copy(conn, rConn)
+	io.Copy(rConn, conn)
 }
 
 func handleConn(remoteAddr string, in <-chan *net.TCPConn, out chan<- *net.TCPConn) {
