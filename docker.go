@@ -121,18 +121,18 @@ func dockercmdline(config Configuration) ([]string, error) {
 		cmdtxt = append(cmdtxt, "-v", config.DockerSocket+":/var/run/docker.sock")
 	}
 	cmdtxt = append(cmdtxt, "--name", config.ContainerName, "--entrypoint", init, config.ImageName)
+	if len(config.ReverseForward) > 0 {
+                cmdtxt, err = setupReverseForward(cmdtxt, config.ReverseForward)
+                if err != nil {
+                        return []string{}, err
+                }
+        }
 	if len(config.Cmd) > 0 {
 		for _, element := range config.Cmd {
 			cmdtxt = append(cmdtxt, element)
 		}
 	} else {
 		cmdtxt = append(cmdtxt, "")
-	}
-	if len(config.ReverseForward) > 0 {
-		cmdtxt, err = setupReverseForward(cmdtxt, config.ReverseForward)
-		if err != nil {
-			return []string{}, err
-		}
 	}
 
 	return cmdtxt, nil
