@@ -57,7 +57,7 @@ func dockerstart(username string, homedirfrom string, homedirto string, name str
 	}
 	var cmdtxt = []string{"run", "-d", "-u", username,
 		"-v", "/etc/passwd:/etc/passwd:ro", "-v", "/etc/group:/etc/group:ro",
-		"--cap-drop", "SUID", "--cap-drop", "SGID", "--cap-drop", "NET_RAW",
+		"--cap-drop", "SETUID", "--cap-drop", "SETGID", "--cap-drop", "NET_RAW",
 		"--cap-drop", "MKNOD"}
 	if len(dockeropts) > 0 {
 		for _, element := range dockeropts {
