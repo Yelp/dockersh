@@ -58,7 +58,7 @@ func initMain() int {
 			fmt.Println(s)
 			parts := strings.Split(s, ":") // Parts is hostport:containerport
 			localAddr := "127.0.0.1:" + parts[1]
-			remoteAddr := "169.254.1.1:" + parts[0]
+			remoteAddr := "172.17.42.1:" + parts[0]
 			go proxyMain(localAddr, remoteAddr)
 			s, err = Readln(r)
 		}
