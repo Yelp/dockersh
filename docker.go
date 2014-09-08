@@ -149,7 +149,6 @@ func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, er
 		// FIXME - Validate the string is sane here!
 		//        strings.Split(element, ":")
 		f.WriteString(element + "\n")
-		cmdtxt = append(cmdtxt, element)
 	}
 	cmdtxt = append(cmdtxt, "-v")
 	cmdtxt = append(cmdtxt, fmt.Sprintf("%s:/portforward:ro", fn))
