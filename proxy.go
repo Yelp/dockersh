@@ -7,35 +7,43 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 )
 
 func proxyConn(remoteAddr string, conn *net.TCPConn) {
 	rAddr, err := net.ResolveTCPAddr("tcp", remoteAddr)
 	if err != nil {
-		panic(err)
+		fmt.Printf("%v", err)
+		return
 	}
 
 	rConn, err := net.DialTCP("tcp", nil, rAddr)
 	if err != nil {
-		panic(err)
+		fmt.Printf("%v", err)
+		return
 	}
 	defer rConn.Close()
 
 	buf := &bytes.Buffer{}
 	for {
+		fmt.Printf("Start byte loop\n")
 		data := make([]byte, 256)
 		n, err := conn.Read(data)
+		fmt.Printf("Done read\n")
 		if err != nil {
-			panic(err)
+			fmt.Printf("%v", err)
+			return
 		}
 		buf.Write(data[:n])
+		fmt.Printf("Done write\n")
 		if data[0] == 13 && data[1] == 10 {
 			break
 		}
 	}
 
 	if _, err := rConn.Write(buf.Bytes()); err != nil {
-		panic(err)
+		fmt.Printf("%v", err)
+		return
 	}
 	log.Printf("sent:\n%v", hex.Dump(buf.Bytes()))
 
@@ -43,7 +51,8 @@ func proxyConn(remoteAddr string, conn *net.TCPConn) {
 	n, err := rConn.Read(data)
 	if err != nil {
 		if err != io.EOF {
-			panic(err)
+			fmt.Printf("%v", err)
+			return
 		} else {
 			log.Printf("received err: %v", err)
 		}
@@ -69,12 +78,14 @@ func proxyMain(localAddr string, remoteAddr string) {
 
 	addr, err := net.ResolveTCPAddr("tcp", localAddr)
 	if err != nil {
-		panic(err)
+		fmt.Printf("%v", err)
+		return
 	}
 
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		panic(err)
+		fmt.Printf("%v", err)
+		return
 	}
 
 	pending, complete := make(chan *net.TCPConn), make(chan *net.TCPConn)
@@ -87,7 +98,8 @@ func proxyMain(localAddr string, remoteAddr string) {
 	for {
 		conn, err := listener.AcceptTCP()
 		if err != nil {
-			panic(err)
+			fmt.Printf("%v", err)
+			return
 		}
 		pending <- conn
 	}
