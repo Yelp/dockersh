@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"io/ioutil"
 )
 
 func dockerVersionCheck() (err error) {
@@ -141,11 +142,11 @@ func dockercmdline(config Configuration) ([]string, error) {
 }
 
 func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, error) {
-	fn := "/tmp/data" // FIXME filename
-	f, err := os.Create(fn)
+	f, err := ioutil.TempFile("/tmp", "dockersh-")
 	if err != nil {
 		return cmdtxt, errors.New("Could not create ReverseForward file:" + err.Error())
 	}
+	fn := f.Name()
 	defer f.Close()
 	for _, element := range reverseForward {
 		// FIXME - Validate the string is sane here!
