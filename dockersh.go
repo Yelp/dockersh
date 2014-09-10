@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/docker/libcontainer/user"
 	"os"
@@ -61,7 +63,7 @@ func gatewayIP() (string, error) {
 		f := strings.Fields(s)
 		if f[1] == "00000000" {
 			a, _ := hex.DecodeString(f[2])
-			ip = fmt.Srintf("%v.%v.%v.%v", a[3], a[2], a[1], a[0])
+			ip = fmt.Sprintf("%v.%v.%v.%v", a[3], a[2], a[1], a[0])
 			err = nil
 			break
 		}
