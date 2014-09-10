@@ -48,6 +48,28 @@ func Readln(r *bufio.Reader) (string, error) {
 	return string(ln), err
 }
 
+func gatewayIP() (string, error) {
+	file, err := os.Open("/proc/net/route")
+	if err != nil {
+		return "", errors.New("Could not open /proc/net/route")
+	}
+	defer file.Close()
+	r := bufio.NewReader(file)
+	s, err := Readln(r)
+	ip := ""
+	for err == nil {
+		f := strings.Fields(s)
+		if f[1] == "00000000" {
+			a, _ := hex.DecodeString(f[2])
+			ip = fmt.Srintf("%v.%v.%v.%v", a[3], a[2], a[1], a[0])
+			err = nil
+			break
+		}
+		s, err = Readln(r)
+	}
+	return ip, err
+}
+
 func initMain() int {
 	fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
 	if file, err := os.Open("/portforward"); err == nil {
@@ -62,7 +84,11 @@ func initMain() int {
 			fmt.Println(s)
 			parts := strings.Split(s, ":") // Parts is hostport:containerport
 			localAddr := "127.0.0.1:" + parts[1]
-			remoteAddr := "172.17.42.1:" + parts[0]
+			gw, err := gatewayIP()
+			if err != nil {
+				panic(err)
+			}
+			remoteAddr := gw + ":" + parts[0]
 			go proxyMain(localAddr, remoteAddr)
 			s, err = Readln(r)
 		}
