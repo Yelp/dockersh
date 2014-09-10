@@ -55,6 +55,10 @@ func initMain() int {
 		r := bufio.NewReader(file)
 		s, err := Readln(r)
 		for err == nil {
+			err = validatePortforwardString(s)
+			if err != nil {
+				panic(err)
+			}
 			fmt.Println(s)
 			parts := strings.Split(s, ":") // Parts is hostport:containerport
 			localAddr := "127.0.0.1:" + parts[1]
