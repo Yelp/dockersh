@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"io/ioutil"
 )
 
 func dockerVersionCheck() (err error) {
@@ -149,8 +149,16 @@ func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, er
 	fn := f.Name()
 	defer f.Close()
 	for _, element := range reverseForward {
-		// FIXME - Validate the string is sane here!
-		//        strings.Split(element, ":")
+		parts := strings.Split(element, ":")
+		if len(parts) != 2 {
+			panic("Number of parts must be 2")
+		}
+		if _, err := strconv.Atoi(parts[0]); err != nil {
+			panic(err)
+		}
+		if _, err := strconv.Atoi(parts[1]); err != nil {
+			panic(err)
+		}
 		f.WriteString(element + "\n")
 	}
 	cmdtxt = append(cmdtxt, "-v")
