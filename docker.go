@@ -141,6 +141,20 @@ func dockercmdline(config Configuration) ([]string, error) {
 	return cmdtxt, nil
 }
 
+func validatePortforwardString(element string) error {
+	parts := strings.Split(element, ":")
+	if len(parts) != 2 {
+		panic("Number of parts must be 2")
+	}
+	if _, err := strconv.Atoi(parts[0]); err != nil {
+		panic(err)
+	}
+	if _, err := strconv.Atoi(parts[1]); err != nil {
+		panic(err)
+	}
+	return nil
+}
+
 func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, error) {
 	f, err := ioutil.TempFile("/tmp", "dockersh-")
 	if err != nil {
@@ -149,15 +163,9 @@ func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, er
 	fn := f.Name()
 	defer f.Close()
 	for _, element := range reverseForward {
-		parts := strings.Split(element, ":")
-		if len(parts) != 2 {
-			panic("Number of parts must be 2")
-		}
-		if _, err := strconv.Atoi(parts[0]); err != nil {
-			panic(err)
-		}
-		if _, err := strconv.Atoi(parts[1]); err != nil {
-			panic(err)
+		err := validatePortforwardString(element)
+		if err != nil {
+			return cmdtxt, err
 		}
 		f.WriteString(element + "\n")
 	}
