@@ -74,27 +74,25 @@ func gatewayIP() (string, error) {
 
 func initMain() int {
 	fmt.Fprintf(os.Stdout, "started dockersh persistent container\n")
-	if file, err := os.Open("/portforward"); err == nil {
-		fmt.Printf("/portforward file exists; processing...")
-		r := bufio.NewReader(file)
-		s, err := Readln(r)
-		for err == nil {
-			err = validatePortforwardString(s)
+	pfString := os.Getenv("DOCKERSH_PORTFORWARD")
+	if pfString != "" {
+		fmt.Printf("DOCKERSH_PORTFORWARD file exists; processing...")
+		pfs := strings.Split(pfString, ",")
+		gw, err := gatewayIP()
+		if err != nil {
+			panic(err)
+		}
+		for _, element := range pfs {
+			err := validatePortforwardString(element)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(s)
-			parts := strings.Split(s, ":") // Parts is hostport:containerport
+			fmt.Println(element)
+			parts := strings.Split(element, ":") // Parts is hostport:containerport
 			localAddr := "127.0.0.1:" + parts[1]
-			gw, err := gatewayIP()
-			if err != nil {
-				panic(err)
-			}
 			remoteAddr := gw + ":" + parts[0]
 			go proxyMain(localAddr, remoteAddr)
-			s, err = Readln(r)
 		}
-		file.Close()
 	}
 	// Wait for terminating signal
 	sc := make(chan os.Signal, 2)

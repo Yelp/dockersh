@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -156,20 +155,12 @@ func validatePortforwardString(element string) error {
 }
 
 func setupReverseForward(cmdtxt []string, reverseForward []string) ([]string, error) {
-	f, err := ioutil.TempFile("/tmp", "dockersh-")
-	if err != nil {
-		return cmdtxt, errors.New("Could not create ReverseForward file:" + err.Error())
-	}
-	fn := f.Name()
-	defer f.Close()
 	for _, element := range reverseForward {
 		err := validatePortforwardString(element)
 		if err != nil {
 			return cmdtxt, err
 		}
-		f.WriteString(element + "\n")
 	}
-	cmdtxt = append(cmdtxt, "-v")
-	cmdtxt = append(cmdtxt, fmt.Sprintf("%s:/portforward:ro", fn))
+	cmdtxt = append(cmdtxt, "--env=DOCKERSH_PORTFORWARD="+strings.Join(reverseForward, ","))
 	return cmdtxt, nil
 }
