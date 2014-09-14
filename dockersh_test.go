@@ -25,3 +25,11 @@ func Test_getInterpolatedConfig_1(t *testing.T) {
 		t.Errorf("MountHomeFrom is %s not foo", c.MountHomeFrom)
 	}
 }
+
+func Test_gatewayIP_1(t *testing.T) {
+	ip, err := gatewayIP()
+        if err != nil {
+		t.Error("Error")
+        }
+	t.Log(ip)
+}
