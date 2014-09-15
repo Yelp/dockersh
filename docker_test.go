@@ -34,3 +34,11 @@ func Test_dockerStart(t *testing.T) {
 		t.Errorf("PID was %i expected 666", pid)
 	}
 }
+
+func Test_validatePortforwardString_1(t *testing.T) {
+	err := validatePortforwardString("1:2")
+	if err != nil {
+		t.Errorf("Error on 1:2")
+	}
+}
+
