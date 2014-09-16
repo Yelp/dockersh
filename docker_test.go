@@ -42,3 +42,16 @@ func Test_validatePortforwardString_1(t *testing.T) {
 	}
 }
 
+func Test_validatePortforwardString_2(t *testing.T) {
+        err := validatePortforwardString("foobar")
+        if err == nil {
+                t.Errorf("No error on 1:2")
+        }
+}
+
+func Test_validatePortforwardString_3(t *testing.T) {
+        err := validatePortforwardString("foobar")
+        if err == nil {
+                t.Errorf("No error on 1:2")
+        }
+}
