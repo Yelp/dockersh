@@ -143,13 +143,13 @@ func dockercmdline(config Configuration) ([]string, error) {
 func validatePortforwardString(element string) error {
 	parts := strings.Split(element, ":")
 	if len(parts) != 2 {
-		panic("Number of parts must be 2")
+		return errors.New("Number of parts must be 2")
 	}
 	if _, err := strconv.Atoi(parts[0]); err != nil {
-		panic(err)
+		return(err)
 	}
 	if _, err := strconv.Atoi(parts[1]); err != nil {
-		panic(err)
+		return(err)
 	}
 	return nil
 }
