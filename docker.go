@@ -125,8 +125,6 @@ func dockercmdline(config Configuration) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
-	} else { // This binds to /portforward always, so that malicious users can't supply a container with a /portforward file
-		cmdtxt = append(cmdtxt, "/dev/null:/portforward:ro")
 	}
 	cmdtxt = append(cmdtxt, "--name", config.ContainerName, "--entrypoint", init, config.ImageName)
 	if len(config.Cmd) > 0 {
