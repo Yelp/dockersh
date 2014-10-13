@@ -144,10 +144,10 @@ func validatePortforwardString(element string) error {
 		return errors.New("Number of parts must be 2")
 	}
 	if _, err := strconv.Atoi(parts[0]); err != nil {
-		return(err)
+		return (err)
 	}
 	if _, err := strconv.Atoi(parts[1]); err != nil {
-		return(err)
+		return (err)
 	}
 	return nil
 }
