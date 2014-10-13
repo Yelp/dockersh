@@ -1,10 +1,11 @@
 language: go
-install: pwd ; echo "GOPATH $GOPATH"; go get -v github.com/mattn/goveralls ; go get code.google.com/p/go.tools/cmd/cover ; GOPATH="$GOPATH:/home/travis/gopath/src/github.com/docker/libcontainer/vendor" go get
+install: go get -v github.com/mattn/goveralls ; go get code.google.com/p/go.tools/cmd/cover ; GOPATH="$REALGOPATH" go get
+script: GOPATH="$REALGOPATH" make
 after_success:
   - /home/travis/gopath/bin/goveralls -coverprofile=profile.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
 
 env: 
   global: 
     - secure: UyAu9yz2SswujPtGkebXp9wMTPR0AssBknx7oxDo7X4iTpgOV7xJPF6oqRKdBV5DLs/65Ms16cFBYaqRtr65j6EEj0X/KPAuiRa3K5rfl1QVNKOYUUZaV+yMr+p2JN5rvHaonPw1mwq1WDq4jXLCUYpW4VFoGSek8Kci/Rwp94o=
-    - GOPATH=/home/travis/gopath:/home/travis/.gvm/pkgsets/go1.3.3/global:/home/travis/gopath/src/github.com/docker/libcontainer/vendor
+    - REALGOPATH=/home/travis/gopath:/home/travis/.gvm/pkgsets/go1.3.3/global:/home/travis/gopath/src/github.com/docker/libcontainer/vendor
 
