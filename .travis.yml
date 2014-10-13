@@ -6,4 +6,5 @@ after_success:
 env: 
   global: 
     secure: UyAu9yz2SswujPtGkebXp9wMTPR0AssBknx7oxDo7X4iTpgOV7xJPF6oqRKdBV5DLs/65Ms16cFBYaqRtr65j6EEj0X/KPAuiRa3K5rfl1QVNKOYUUZaV+yMr+p2JN5rvHaonPw1mwq1WDq4jXLCUYpW4VFoGSek8Kci/Rwp94o=
+    GOPATH: /home/travis/gopath:/home/travis/.gvm/pkgsets/go1.3.3/global:/home/travis/gopath/src/github.com/docker/libcontainer/vendor
 
