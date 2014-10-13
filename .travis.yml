@@ -1,5 +1,5 @@
 language: go
-install: go get -v github.com/mattn/goveralls ; go get code.google.com/p/go.tools/cmd/cover ; pwd; cp -rv ../../github.com/docker/libcontainer/vendor/src/* ../../ ; go get
+install: go get -v github.com/mattn/goveralls ; go get code.google.com/p/go.tools/cmd/cover ; go get github.com/docker/libcontainer ; pwd; cp -rv ../../github.com/docker/libcontainer/vendor/src/* ../../ ; go get
 after_success:
   - /home/travis/gopath/bin/goveralls -coverprofile=profile.out -service=travis-ci -package=Yelp/dockersh -repotoken="$COVERALLS_TOKEN"
 
