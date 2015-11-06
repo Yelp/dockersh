@@ -27,7 +27,7 @@ Why do I want this?
 You want to allow multiple users to ssh onto a single box, but you'd like some isolation
 between those users. With dockersh each user enters their
 own individual docker container (acting like a lightweight virtual machine), with their home directory mounted from the host
-system (so that user data is persistent between container restarts), but with it's own kernel namespaces for
+system (so that user data is persistent between container restarts), but with its own kernel namespaces for
 processes and networking.
 
 
@@ -41,7 +41,7 @@ container, and either have have a different port for each user to ssh to or some
 Forcecommand hacks (which only work with agent forwarding from the client).
 
 
-Dockersh eliminates the need for any of these techiques by acting like a regular
+Dockersh eliminates the need for any of these techniques by acting like a regular
 shell which can be used in ``/etc/passwd`` or as an ssh
 [ForceCommand](http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/sshd_config.5?query=sshd_config).  
 This allows you to have a single ssh process, on the normal ssh port, and gives
