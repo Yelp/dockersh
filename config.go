@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"code.google.com/p/gcfg"
+	"gopkg.in/gcfg.v1"
 )
 
 type Configuration struct {
