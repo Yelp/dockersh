@@ -1,6 +1,8 @@
-  * ![Build status](https://travis-ci.org/Yelp/dockersh.svg)
-  * [![Coverage Status](https://coveralls.io/repos/Yelp/dockersh/badge.png)](https://coveralls.io/r/Yelp/dockersh)
-  * [Dockerhub container](https://registry.hub.docker.com/u/yelp/dockersh/)
+ARCHIVAL NOTICE
+===============
+
+This project is no longer maintained and is left up for historic purposes.
+
 
 dockersh
 ========
